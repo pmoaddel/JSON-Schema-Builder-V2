@@ -37,6 +37,9 @@
 		margin-bottom: 0.7rem;
 		position: relative;
 		overflow: hidden;
+    display: flex;
+    flex-direction: row;
+
 		&:hover {
 			color: @color_2;
 			backgaround: #f4f6f7;
@@ -63,25 +66,25 @@
 		}
 		.model-icons {
 			transition: all 0.2s ease-out;
-			position: absolute;
 			z-index: 999;
-			top: 0rem;
-			right: -10.4rem;
 			text-align: right;
 			background-color: @background_color_1;
-			line-height: 4.3rem;
+      display: flex;
+
 			.model-info {
-				height: 4rem;
-				display: inline-block;
+				display: flex;
 				border: 1px solid #dae2ea;
 				border-right: 0;
 				border-top: 0;
 				border-bottom: 0;
-				padding: 0 1.5rem;
+        align-items: center;
+        justify-content: space-evenly;
+        width: 135px;
+
 				.disabled {
 					opacity: 0.3;
 				}
-				.glyphicon {
+				fa-icon {
 					&:not(.model-comment) {
 						&:hover {
 							cursor: pointer;
@@ -90,17 +93,19 @@
 				}
 			}
 			.model-actions {
-				height: 4rem;
-				display: inline-block;
+				display: flex;
 				border: 1px solid #dae2ea;
 				border-right: 0;
 				border-top: 0;
 				border-bottom: 0;
-				padding: 0 1.5rem;
+        width: 60px;
+        align-items: center;
+        justify-content: space-evenly;
+
 				.disabled {
 					opacity: 0.3;
 				}
-				.glyphicon {
+				fa-icon {
 					&:not(.model-comment) {
 						&:hover {
 							cursor: pointer;
@@ -109,13 +114,7 @@
 				}
 			}
 			.model-type {
-				position: relative;
-				top: -0.3rem;
-				line-height: 1;
 				opacity: 0.3;
-				.object-prop-count {
-					font-size: 1.3rem;
-				}
 			}
 		}
 	}

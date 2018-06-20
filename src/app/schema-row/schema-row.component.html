@@ -3,25 +3,20 @@
   <fa-icon class="t_color obj-exp" (click)="objDetSxpanded=!objDetSxpanded" *ngIf="!objDetSxpanded" icon="chevron-right"></fa-icon>
   <input class="model-title" type="text" [(ngModel)]="item.name"/>
   <span model-type-selector></span>
-  <span class="object-prop-count">
+  <!-- <span class="object-prop-count">
     <span>{{item._properties.length}}</span>
-  </span>
+  </span> -->
   <div class="model-icons">
     <div class="model-info">
       <span class="model-type">
-        <span [ngClass]="item.type" class="badge badge-default">{{t_prefix+item.type.toUpperCase()}}
+        <span [ngClass]="item.type" class="badge badge-pill badge-primary">{{item.type.toUpperCase()}}
           <span class="object-prop-count">
             <span>{{item._properties.length}}</span>
           </span>
         </span>
       </span>
-      <span class="model-required">
-        <fa-icon icon="asterisk" (click)="item.required=!item.required" [ngClass]="{ 'disabled':item.$root$, 'text-danger': item.required}" tooltip-append-to-body="true">
-        </fa-icon>
-      </span>
-      <fa-icon icon="comment-alt" class="model-comment" [ngClass]="{'disabled':!item.description}" ngbTooltip="{{item.description?item.description:(t_prefix+'NO_DESCRIPTION')}}"
-        tooltip-append-to-body="true">
-      </fa-icon>
+      <fa-icon class="model-required" icon="asterisk" (click)="item.required=!item.required" [ngClass]="{ 'disabled':item.$root$, 'text-danger': item.required}" tooltip-append-to-body="true"></fa-icon>
+      <fa-icon icon="comment-alt" class="model-comment" [ngClass]="{'disabled':!item.description}" ngbTooltip="{{item.description?item.description:(t_prefix+'NO_DESCRIPTION')}}" tooltip-append-to-body="true"></fa-icon>
     </div>
     <div class="model-actions"> <!--keep on same line to remove whitespace -->
       <fa-icon icon="plus" class="obj-add" (click)="addNewProp(item,$data)"></fa-icon>

@@ -15,7 +15,7 @@ export class DesignerComponent implements OnInit {
       name: 'Account Number Request',
       description: 'description',
       required: true,
-      type: 'none',
+      type: 'Object',
       _properties: []
     },
     {
@@ -23,7 +23,7 @@ export class DesignerComponent implements OnInit {
       name: 'Account',
       description: 'description',
       required: false,
-      type: 'none',
+      type: 'Object',
       _properties: []
     }
   ];
