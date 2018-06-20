@@ -1,0 +1,97 @@
+<div class="js-row" [ngClass]="{'t_bg': showDetailsPan}">
+  <fa-icon class="t_color obj-exp" (click)="objDetSxpanded=!objDetSxpanded" *ngIf="objDetSxpanded" icon="chevron-down"></fa-icon>
+  <fa-icon class="t_color obj-exp" (click)="objDetSxpanded=!objDetSxpanded" *ngIf="!objDetSxpanded" icon="chevron-right"></fa-icon>
+  <input class="model-title" type="text" [(ngModel)]="item.name"/>
+  <span model-type-selector></span>
+  <span class="object-prop-count">
+    <span>{{item._properties.length}}</span>
+  </span>
+  <div class="model-icons">
+    <div class="model-info">
+      <span class="model-type">
+        <span [ngClass]="item.type" class="badge badge-default">{{t_prefix+item.type.toUpperCase()}}
+          <span class="object-prop-count">
+            <span>{{item._properties.length}}</span>
+          </span>
+        </span>
+      </span>
+      <span class="model-required">
+        <fa-icon icon="asterisk" (click)="item.required=!item.required" [ngClass]="{ 'disabled':item.$root$, 'text-danger': item.required}" tooltip-append-to-body="true">
+        </fa-icon>
+      </span>
+      <fa-icon icon="comment-alt" class="model-comment" [ngClass]="{'disabled':!item.description}" ngbTooltip="{{item.description?item.description:(t_prefix+'NO_DESCRIPTION')}}"
+        tooltip-append-to-body="true">
+      </fa-icon>
+    </div>
+    <div class="model-actions"> <!--keep on same line to remove whitespace -->
+      <fa-icon icon="plus" class="obj-add" (click)="addNewProp(item,$data)"></fa-icon>
+      <span class="model-detail" hidden={{showDetailsPan}} (click)="showDetailsPan=true">
+        <fa-icon icon="pencil-alt">
+        </fa-icon>
+      </span>
+      <span class="model-done" hidden={{!showDetailsPan}} (click)="showDetailsPan=false">
+        <fa-icon icon="check" class="text-success"></fa-icon>
+      </span>
+      <span class="model-remove" [ngClass]="{'disabled':item.$root$}" (click)="removeitem(item)">
+        <fa-icon icon="times"></fa-icon>
+      </span>
+    </div>
+  </div>
+  <div class="model-det-cont clearfix" *ngIf="showDetailsPan">
+    <div class="col-xs-6" style="border-right:1px solid #9E9E9E">
+      <div class="t_color bold">{{ t_prefix+'BASIC_INFO' }}</div>
+      <div class="">
+        <form class="form-horizontal form-compact model-detail-form" name="detailForm" role="form">
+          <div class="form-group">
+            <label class="control-label col-xs-2">{{ t_prefix+'NAME' }}:</label>
+            <div class="col-xs-9">
+              <input type="text" class="form-control sm detail-ip" id="foldName" placeholder="{{ t_prefix+'FIELD_NAME' }}"
+                ng-model="item._key">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-xs-2">{{ t_prefix+'DESCRIPTION' }}:</label>
+            <div class="col-xs-9">
+              <textarea class="form-control" ng-model="item.description"></textarea>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-xs-2">{{ t_prefix+'DEFAULT' }}:</label>
+            <div class="col-xs-9">
+              <input type="text" class="form-control sm detail-ip" ng-model="item.default" />
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="col-xs-6">
+      <form class="form-inline model-detail-form" name="detailForm" role="form">
+        <div class="t_color bold">{{ t_prefix+'VALIDATIONS' }}</div>
+        <div *ngIf="!item.$root$">
+          <div class="checkbox" style="padding: 2px 0;">
+            <label><input type="checkbox" ng-model="item.required"> {{ t_prefix+'REQUIRED_Q' }}</label>
+          </div>
+        </div>
+        <div>
+          <div class="checkbox" style="padding: 2px 0;">
+            <label><input type="checkbox" ng-model="item._disallowAdditional"> {{ t_prefix+'DISALLOW_ADDITIONAL_PROPERTIES' }}</label>
+          </div>
+        </div>
+        <div class="form-group col-xs-12">
+          <label class="model-label-x">{{ t_prefix+'MIN_PROPERTIES' }}:</label>
+          <input type="number" class="form-control sm detail-ip" ng-model="item._minProperties" min="0" placeholder=">=0" />
+        </div>
+        <div class="form-group col-xs-12">
+          <label class="model-label-x">{{ t_prefix+'MAX_PROPERTIES' }}:</label>
+          <input type="number" class="form-control sm detail-ip" ng-model="item._maxProperties" min="0" placeholder=">=0" />
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+<div class="indent" hidden={{!objDetSxpanded}}>
+  <div ng-repeat="item in item._properties">
+    <div ng-include="'json-schema-builder/templates/'+item.type+'-schema.html'"></div>
+  </div>
+</div>
