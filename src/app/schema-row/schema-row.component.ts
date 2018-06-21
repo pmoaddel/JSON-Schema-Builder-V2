@@ -9,4 +9,12 @@ import { ISchemaItem } from '../schema';
 export class SchemaRowComponent {
   @Input() item: ISchemaItem;
   objDetSxpanded: boolean = false;
+
+  removeItem(item: ISchemaItem): void {
+    console.log('remove item', item);
+  }
+
+  addNewProp(): void {
+    console.error('add prop not implemented');
+  }
 }

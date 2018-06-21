@@ -25,7 +25,7 @@
         <fa-icon icon="plus" class="obj-add" (click)="addNewProp(item,$data)"></fa-icon>
         <fa-icon icon="pencil-alt" class="model-detail" *ngIf="!showDetailsPan" (click)="showDetailsPan=true"></fa-icon>
         <fa-icon icon="check" class="model-done" *ngIf="showDetailsPan" (click)="showDetailsPan=false" class="text-success"></fa-icon>
-        <fa-icon icon="times" class="model-remove" [ngClass]="{'disabled':item.$root$}" (click)="removeitem(item)"></fa-icon>
+        <fa-icon icon="times" class="model-remove" [ngClass]="{'disabled':item.isRoot}" (click)="removeItem(item)"></fa-icon>
       </div>
     </div>
   </div>

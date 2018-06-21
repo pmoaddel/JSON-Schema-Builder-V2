@@ -3,6 +3,7 @@ export interface ISchemaItem {
     type: string;
     description: string;
     required: boolean;
+    parent: ISchemaItem;
 
     generateJSONSchema(): any
 }
@@ -12,11 +13,13 @@ export class SchemaBasic implements ISchemaItem{
   type: string;
   description: string;
   required: boolean;
+  parent: ISchemaItem;
 
-  constructor (json) {
+  constructor (json: any, parent: ISchemaItem) {
     this.title = json.title;
     this.description = json.description;
     this.type = json.type;
+    this.parent = parent;
   }
 
   generateJSONSchema(): any {
@@ -34,13 +37,13 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem {
   properties: Array<ISchemaItem>;
   isRoot: boolean;
 
-  constructor (json, isRoot: boolean) {
-    super(json);
+  constructor (json: any, parent: ISchemaItem) {
+    super(json, parent);
     this.schema = json.$schema;
-    this.isRoot = isRoot;
 
     this.properties = [];
     this.requiredItems = json.required;
+    this.isRoot = !!parent;
 
     if (json.properties) {
       Object.entries(json.properties).forEach((entry: any[]) => {
@@ -49,13 +52,13 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem {
         value.title = key;
         switch(value.type) {
           case 'object':
-            this.properties.push(new SchemaObject(value, false));
+            this.properties.push(new SchemaObject(value, this));
             break;
           case 'array':
-            this.properties.push(new SchemaArray(value));
+            this.properties.push(new SchemaArray(value, this));
             break;
           default:
-            this.properties.push(new SchemaBasic(value));
+            this.properties.push(new SchemaBasic(value, this));
         }
       });
     }
@@ -81,20 +84,20 @@ export class SchemaArray extends SchemaBasic implements ISchemaItem {
   schema: string;
   items: ISchemaItem;
 
-  constructor (json) {
-    super(json);
+  constructor (json: any, parent: ISchemaItem) {
+    super(json, parent);
     this.schema = json.$schema;
 
     if (json.items) {
       switch(json.items.type) {
         case 'object':
-          this.items = new SchemaObject(json.items, false);
+          this.items = new SchemaObject(json.items, this);
           break;
         case 'array':
-          this.items = new SchemaArray(json.items);
+          this.items = new SchemaArray(json.items, this);
           break;
         default:
-          this.items = new SchemaBasic(json.items);
+          this.items = new SchemaBasic(json.items, this);
       }
     }
   }

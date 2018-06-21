@@ -5,6 +5,6 @@ import { SchemaObject } from './schema';
 export class SchemaReaderService {
   public workingSchema: SchemaObject;
   public loadSchema (jsonSchemaObject: any): void {
-    this.workingSchema = new SchemaObject(jsonSchemaObject, true);
+    this.workingSchema = new SchemaObject(jsonSchemaObject, null);
   }
 }
