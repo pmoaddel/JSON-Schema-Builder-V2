@@ -1,4 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { SchemaReaderService } from './schema-reader.service';
+import { testData } from '../assets/testData.js';
+
 
 @Component({
   selector: 'app-root',
@@ -7,4 +10,11 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title: string = 'JSON Schema Builder V2';
+
+  constructor(
+    private schemaReaderService: SchemaReaderService) {}
+
+  ngOnInit() {
+    this.schemaReaderService.parseSchema(testData);
+  }
 }

@@ -44,6 +44,21 @@
       display: flex;
       flex-direction: row;
       width: 100%;
+      justify-content: space-between;
+
+      .title-group {
+        display: flex;
+        flex-direction: row;
+        flex-grow: 1;
+
+        .obj-exp {
+          width: 50px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+        }
+      }
     }
 
 		&:hover {
@@ -153,15 +168,7 @@
 		margin-left: 3.3rem;
 		position: relative;
 	}
-	.obj-exp {
-		position: absolute;
-		left: 0;
-		top: 0;
-		font-size: 12px;
-		cursor: pointer;
-    padding: ((@row-height - 10px) / 2) 10px;
 
-	}
 	.array {
 		background-color: @background_color_2 !important;
 	}
@@ -218,8 +225,6 @@
 		box-shadow: none;
 		border: none;
 		background: transparent;
-		padding: 0 3.3rem;
-		margin-right: 5px;
 		outline: none;
 	}
 	input.model-key {

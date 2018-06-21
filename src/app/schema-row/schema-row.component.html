@@ -1,18 +1,20 @@
 <div class="js-row" [ngClass]="{'t_bg': showDetailsPan}">
   <div class="information-bar">
-    <fa-icon class="t_color obj-exp" (click)="objDetSxpanded=!objDetSxpanded" *ngIf="objDetSxpanded" icon="chevron-down"></fa-icon>
-    <fa-icon class="t_color obj-exp" (click)="objDetSxpanded=!objDetSxpanded" *ngIf="!objDetSxpanded" icon="chevron-right"></fa-icon>
-    <input class="model-title" type="text" [(ngModel)]="item.name"/>
-    <span model-type-selector></span>
-    <!-- <span class="object-prop-count">
-      <span>{{item._properties.length}}</span>
-    </span> -->
+    <div class="title-group">
+      <fa-icon class="t_color obj-exp" (click)="objDetSxpanded=!objDetSxpanded" *ngIf="objDetSxpanded" icon="chevron-down"></fa-icon>
+      <fa-icon class="t_color obj-exp" (click)="objDetSxpanded=!objDetSxpanded" *ngIf="!objDetSxpanded" icon="chevron-right"></fa-icon>
+      <input class="model-title" type="text" [(ngModel)]="item.title"/>
+      <span model-type-selector></span>
+      <!-- <span class="object-prop-count">
+        <span>{{item.properties.length}}</span>
+      </span> -->
+    </div>
     <div class="model-icons">
       <div class="model-info">
         <span class="model-type">
           <span [ngClass]="item.type" class="badge badge-pill badge-primary">{{item.type.toUpperCase()}}
             <span class="object-prop-count">
-              <span>{{item._properties.length}}</span>
+              <span>{{item.properties.length}}</span>
             </span>
           </span>
         </span>
@@ -80,8 +82,17 @@
     </div>
   </div>
 </div>
-<div class="indent" hidden={{!objDetSxpanded}}>
-  <div ng-repeat="item in item._properties">
-    <div ng-include="'json-schema-builder/templates/'+item.type+'-schema.html'"></div>
+<div class="indent" *ngIf="objDetSxpanded">
+  <div *ngFor="let item of item.properties">
+    <app-schema-row
+      [item]="item"
+    >
+    </app-schema-row>
+  </div>
+  <div *ngIf="item.items">
+    <app-schema-row
+      [item]="item.items"
+    >
+    </app-schema-row>
   </div>
 </div>
