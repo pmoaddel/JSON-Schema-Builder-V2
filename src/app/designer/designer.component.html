@@ -1,11 +1,5 @@
-<!-- <div *ngFor="let item of items">
-  <app-schema-row
-    [item]="item"
-  >
-  </app-schema-row>
-</div> -->
-<div>
-  <app-schema-row
-    [item]="jsonSchema"
-    >
-<div>
+<div class="container">
+  <app-schema-row [item]="jsonSchema"></app-schema-row>
+  <div class='btn btn-primary' (click)="generateSchema()"> Generate Schema </div>
+  <pre *ngIf="generatedSchema">{{generatedSchema}}</pre>
+</div>

@@ -10,11 +10,13 @@ import { testData } from '../assets/testData.js';
 })
 export class AppComponent {
   title: string = 'JSON Schema Builder V2';
+  activeTab: string;
 
   constructor(
-    private schemaReaderService: SchemaReaderService) {}
+    private schemaReaderService: SchemaReaderService) { }
 
   ngOnInit() {
-    this.schemaReaderService.parseSchema(testData);
+    this.schemaReaderService.loadSchema(testData);
+    this.activeTab = window.location.pathname.replace('/', '');
   }
 }

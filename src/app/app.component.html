@@ -17,10 +17,10 @@
     <div class="p-3">
       <ul class="nav nav-pills justify-content-center">
         <li class="nav-item">
-          <a class="nav-link" routerLink='/designer'>Designer</a>
+          <a class="nav-link" (click)="activeTab='designer'" [ngClass]="{'active': activeTab==='designer'}" routerLink='/designer'>Designer</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" routerLink='/raw'>Raw</a>
+          <a class="nav-link" (click)="activeTab='raw'" [ngClass]="{'active': activeTab==='raw'}" routerLink='/raw'>Raw</a>
         </li>
       </ul>
     </div>

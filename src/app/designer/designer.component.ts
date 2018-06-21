@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { testData } from '../../assets/testData.js';
-import { SchemaItem } from '../schema-item';
+import { ISchemaItem } from '../schema';
 import { SchemaReaderService } from '../schema-reader.service';
 
 
@@ -10,7 +10,8 @@ import { SchemaReaderService } from '../schema-reader.service';
   styleUrls: ['./designer.component.less']
 })
 export class DesignerComponent implements OnInit {
-  jsonSchema: SchemaItem;
+  jsonSchema: ISchemaItem;
+  generatedSchema: any;
   items = [
     {
       id: 1,
@@ -34,6 +35,10 @@ export class DesignerComponent implements OnInit {
     private schemaReaderService: SchemaReaderService) {}
 
   ngOnInit() {
-    this.jsonSchema = this.schemaReaderService.jsonSchema;
+    this.jsonSchema = this.schemaReaderService.workingSchema;
+  }
+
+  generateSchema() {
+    this.generatedSchema = JSON.stringify(this.jsonSchema.generateJSONSchema(), null, 2);
   }
 }

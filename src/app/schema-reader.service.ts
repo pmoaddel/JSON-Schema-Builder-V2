@@ -1,14 +1,10 @@
 import { Injectable } from '@angular/core';
-import { SchemaItem } from './schema-item';
+import { SchemaObject } from './schema';
 
 @Injectable({ providedIn: 'root' })
 export class SchemaReaderService {
-  public jsonSchema: SchemaItem;
-  // parseSchemeItem(item) {}
-  public parseSchema (jsonSchemaObject: Object): SchemaItem {
-    let finalSchema = {}
-    //parse root schema
-    let rootSchema = new SchemaItem(jsonSchemaObject, true);
-    this.jsonSchema = rootSchema;
+  public workingSchema: SchemaObject;
+  public loadSchema (jsonSchemaObject: any): void {
+    this.workingSchema = new SchemaObject(jsonSchemaObject, true);
   }
 }

@@ -14,7 +14,7 @@
         <span class="model-type">
           <span [ngClass]="item.type" class="badge badge-pill badge-primary">{{item.type.toUpperCase()}}
             <span class="object-prop-count">
-              <span>{{item.properties.length}}</span>
+              <span *ngIf="item.properties">{{item.properties.length}}</span>
             </span>
           </span>
         </span>
