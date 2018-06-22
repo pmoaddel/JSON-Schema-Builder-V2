@@ -29,15 +29,15 @@ export const testData =
         "required": [
           "Id"
         ],
-        "Id": {
-          "type": "string",
-          "description": "ID of the Account"
-        },
-        "Name": {
-          "type": "string",
-          "description": "Name of the Account"
-        },
         "properties": {
+          "Id": {
+            "type": "string",
+            "description": "ID of the Account"
+          },
+          "Name": {
+            "type": "string",
+            "description": "Name of the Account"
+          },
           "SomeThing": {
             "type": "object",
             "title": "Some Thing",

@@ -8,18 +8,27 @@ export interface ISchemaItem {
     generateJSONSchema(): any
 }
 
+export interface IHasProperties {
+    properties: ISchemaItem[];
+    removeProperty(title: string): void;
+}
+
 export class SchemaBasic implements ISchemaItem{
   title: string;
   type: string;
   description: string;
   required: boolean;
   parent: ISchemaItem;
+  format: string;
+  isArrayItem: boolean;
 
   constructor (json: any, parent: ISchemaItem) {
     this.title = json.title;
     this.description = json.description;
-    this.type = json.type;
+    this.type = json.type || 'string';
+    this.format = json.format;
     this.parent = parent;
+    this.isArrayItem = false;
   }
 
   generateJSONSchema(): any {
@@ -31,8 +40,7 @@ export class SchemaBasic implements ISchemaItem{
   }
 }
 
-export class SchemaObject extends SchemaBasic implements ISchemaItem {
-  schema: string;
+export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasProperties {
   requiredItems: Array<String>;
   properties: Array<ISchemaItem>;
   isRoot: boolean;
@@ -42,8 +50,8 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem {
     this.schema = json.$schema;
 
     this.properties = [];
-    this.requiredItems = json.required;
-    this.isRoot = !!parent;
+    this.isRoot = !parent;
+    this.required = this.isRoot;
 
     if (json.properties) {
       Object.entries(json.properties).forEach((entry: any[]) => {
@@ -62,6 +70,13 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem {
         }
       });
     }
+    if (json.required) {
+        json.required.forEach((requiredItemName) => {
+            this.properties.find((property) => {
+                return property.title === requiredItemName;
+            }).required = true;
+        });
+    }
   }
 
   generateJSONSchema(): any {
@@ -70,13 +85,35 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem {
         title: this.title,
         description: this.description,
         type: this.type,
-        required: this.requiredItems,
+        required: []
         properties: {},
     }
     this.properties.forEach((property: ISchemaItem) => {
         output.properties[property.title] = property.generateJSONSchema();
+        if (property.required) {
+            output.required.push(property.title);
+        }
     });
     return output;
+  }
+
+  removeProperty(title: string): void {
+    this.properties = this.properties.filter((property) => {
+        return property.title != title;
+    });
+  }
+
+  addProperty(): void {
+    this.properties.push(new SchemaBasic({}, this));
+  }
+}
+
+export class RootSchemaObject extends SchemaObject implements ISchemaItem {
+  schema: string;
+
+  constructor (json: any) {
+    super(json);
+    this.schema = json.$schema;
   }
 }
 
@@ -88,18 +125,19 @@ export class SchemaArray extends SchemaBasic implements ISchemaItem {
     super(json, parent);
     this.schema = json.$schema;
 
-    if (json.items) {
-      switch(json.items.type) {
-        case 'object':
-          this.items = new SchemaObject(json.items, this);
-          break;
-        case 'array':
-          this.items = new SchemaArray(json.items, this);
-          break;
-        default:
-          this.items = new SchemaBasic(json.items, this);
-      }
+    const itemType = json.items ? json.items.type : undefined;
+    const itemContent = json.items || {};
+    switch(json.items.type) {
+      case 'object':
+        this.items = new SchemaObject(itemContent, this);
+        break;
+      case 'array':
+        this.items = new SchemaArray(itemContent, this);
+        break;
+      default:
+        this.items = new SchemaBasic(itemContent, this);
     }
+    this.items.isArrayItem = true;
   }
   generateJSONSchema(): any {
     let output = {

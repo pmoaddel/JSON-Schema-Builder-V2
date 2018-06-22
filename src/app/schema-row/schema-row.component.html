@@ -14,21 +14,19 @@
         <span class="model-type">
           <span [ngClass]="item.type" class="badge badge-pill badge-primary">{{item.type.toUpperCase()}}
             <span class="object-prop-count">
-              <span *ngIf="item.properties">{{item.properties.length}}</span>
+              <span *ngIf="item.properties">({{item.properties.length}})</span>
             </span>
           </span>
         </span>
-        <ng-template #tipContent>
-          {{item.required ? 'Required' : 'Not Required'}}
-        </ng-template>
-        <fa-icon class="model-required" icon="asterisk" (click)="item.required=!item.required" [ngClass]="{ 'disabled':item.isRoot, 'text-danger': item.required}" [ngbTooltip]="tipContent"></fa-icon>
+        <ng-template #tipContent>{{item.required ? 'Required' : 'Not Required'}}</ng-template>
+        <button class="wrapper-only" [disabled]="item.isRoot " (click)="item.required=!item.required"><fa-icon class="model-required" icon="asterisk" [ngClass]="{ 'disabled':item.isRoot, 'text-danger': item.required}" [ngbTooltip]="tipContent"></fa-icon></button>
         <fa-icon icon="comment-alt" class="model-comment" [ngClass]="{'disabled':!item.description}" ngbTooltip="{{item.description?item.description:(t_prefix+'NO_DESCRIPTION')}}"></fa-icon>
       </div>
       <div class="model-actions"> <!--keep on same line to remove whitespace -->
-        <fa-icon icon="plus" class="obj-add" (click)="addNewProp(item,$data)"></fa-icon>
+        <button class="wrapper-only" [disabled]="!item.properties" (click)="addNewProp(item)"><fa-icon icon="plus" class="obj-add"></fa-icon></button>
         <fa-icon icon="pencil-alt" class="model-detail" *ngIf="!showDetailsPan" (click)="showDetailsPan=true"></fa-icon>
         <fa-icon icon="check" class="model-done" *ngIf="showDetailsPan" (click)="showDetailsPan=false" class="text-success"></fa-icon>
-        <fa-icon icon="times" class="model-remove" [ngClass]="{'disabled':item.isRoot}" (click)="removeItem(item)"></fa-icon>
+        <button class="wrapper-only" [disabled]="item.isRoot || item.isArrayItem" (click)="removeItem(item)"><fa-icon icon="times" class="model-remove" [ngClass]="{'disabled':item.isRoot}"></fa-icon></button>
       </div>
     </div>
   </div>
@@ -41,9 +39,7 @@
             <div class="form-group">
               <label class="control-label col-xs-2"> Title: </label>
               <div class="col-xs-9">
-                <input type="text" class="form-control sm detail-ip" id="foldName"
-                  [(ngModel)]="item._key" name="title">
-                  <!-- key? -->
+                <input type="text" class="form-control sm detail-ip" id="foldName" [(ngModel)]="item._key" name="title"> <!-- key? -->
               </div>
             </div>
             <div class="form-group">
@@ -89,15 +85,9 @@
 </div>
 <div class="indent" *ngIf="objDetSxpanded">
   <div *ngFor="let item of item.properties">
-    <app-schema-row
-      [item]="item"
-    >
-    </app-schema-row>
+    <app-schema-row [item]="item"></app-schema-row>
   </div>
   <div *ngIf="item.items">
-    <app-schema-row
-      [item]="item.items"
-    >
-    </app-schema-row>
+    <app-schema-row [item]="item.items"></app-schema-row>
   </div>
 </div>
