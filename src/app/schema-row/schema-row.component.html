@@ -18,8 +18,11 @@
             </span>
           </span>
         </span>
-        <fa-icon class="model-required" icon="asterisk" (click)="item.required=!item.required" [ngClass]="{ 'disabled':item.$root$, 'text-danger': item.required}" tooltip-append-to-body="true"></fa-icon>
-        <fa-icon icon="comment-alt" class="model-comment" [ngClass]="{'disabled':!item.description}" ngbTooltip="{{item.description?item.description:(t_prefix+'NO_DESCRIPTION')}}" tooltip-append-to-body="true"></fa-icon>
+        <ng-template #tipContent>
+          {{item.required ? 'Required' : 'Not Required'}}
+        </ng-template>
+        <fa-icon class="model-required" icon="asterisk" (click)="item.required=!item.required" [ngClass]="{ 'disabled':item.isRoot, 'text-danger': item.required}" [ngbTooltip]="tipContent"></fa-icon>
+        <fa-icon icon="comment-alt" class="model-comment" [ngClass]="{'disabled':!item.description}" ngbTooltip="{{item.description?item.description:(t_prefix+'NO_DESCRIPTION')}}"></fa-icon>
       </div>
       <div class="model-actions"> <!--keep on same line to remove whitespace -->
         <fa-icon icon="plus" class="obj-add" (click)="addNewProp(item,$data)"></fa-icon>
