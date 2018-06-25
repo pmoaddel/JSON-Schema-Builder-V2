@@ -1,26 +1,38 @@
 <div class="js-row" [ngClass]="{'t_bg': showDetailsPan}">
   <div class="information-bar">
     <div class="title-group">
-      <fa-icon class="t_color obj-exp" (click)="objDetSxpanded=!objDetSxpanded" *ngIf="objDetSxpanded" icon="chevron-down"></fa-icon>
-      <fa-icon class="t_color obj-exp" (click)="objDetSxpanded=!objDetSxpanded" *ngIf="!objDetSxpanded" icon="chevron-right"></fa-icon>
+      <div class="obj-exp" (click)="objDetSxpanded=!objDetSxpanded">
+        <div *ngIf="item.properties">
+          <fa-icon class="t_color" *ngIf="objDetSxpanded" icon="chevron-down"></fa-icon>
+          <fa-icon class="t_color" *ngIf="!objDetSxpanded" icon="chevron-right"></fa-icon>
+        </div>
+      </div>
       <input class="model-title" type="text" [(ngModel)]="item.title" name="title"/>
-      <span model-type-selector></span>
-      <!-- <span class="object-prop-count">
-        <span>{{item.properties.length}}</span>
-      </span> -->
     </div>
     <div class="model-icons">
       <div class="model-info">
-        <span class="model-type">
-          <span [ngClass]="item.type" class="badge badge-pill badge-primary">{{item.type.toUpperCase()}}
+        <div ngbDropdown *ngIf="!item.isRoot" class="d-inline-block">
+          <button [ngClass]="item.type" class="badge badge-pill badge-primary" id="dropdownItemType" ngbDropdownToggle>
+            {{item.type.toUpperCase()}}
             <span class="object-prop-count">
               <span *ngIf="item.properties">({{item.properties.length}})</span>
             </span>
+          </button>
+          <div ngbDropdownMenu class="type-selector" aria-labelledby="dropdownItemType">
+            <button class="badge badge-pill badge-primary string" (click)="item.changeType('string')">STRING</button>
+            <button class="badge badge-pill badge-primary number" (click)="item.changeType('number')">NUMBER</button>
+            <button class="badge badge-pill badge-primary object" (click)="item.changeType('object')">OBJECT</button>
+            <button class="badge badge-pill badge-primary array" (click)="item.changeType('array')">ARRAY</button>
+          </div>
+        </div>
+        <span *ngIf="item.isRoot" [ngClass]="item.type" class="badge badge-pill badge-primary">{{item.type.toUpperCase()}}
+          <span class="object-prop-count">
+            <span *ngIf="item.properties">({{item.properties.length}})</span>
           </span>
         </span>
         <ng-template #tipContent>{{item.required ? 'Required' : 'Not Required'}}</ng-template>
         <button class="wrapper-only" [disabled]="item.isRoot " (click)="item.required=!item.required"><fa-icon class="model-required" icon="asterisk" [ngClass]="{ 'disabled':item.isRoot, 'text-danger': item.required}" [ngbTooltip]="tipContent"></fa-icon></button>
-        <fa-icon icon="comment-alt" class="model-comment" [ngClass]="{'disabled':!item.description}" ngbTooltip="{{item.description?item.description:(t_prefix+'NO_DESCRIPTION')}}"></fa-icon>
+        <fa-icon icon="comment-alt" class="model-comment" [ngClass]="{'disabled':!item.description}" ngbTooltip="{{item.description}}"></fa-icon>
       </div>
       <div class="model-actions"> <!--keep on same line to remove whitespace -->
         <button class="wrapper-only" [disabled]="!item.properties" (click)="addNewProp(item)"><fa-icon icon="plus" class="obj-add"></fa-icon></button>
@@ -60,7 +72,7 @@
       <div class="col">
         <form class="form-horizontal form-compact model-detail-form" name="detailForm" role="form">
           <div class="t_color bold"> Validations: </div>
-          <div *ngIf="!item.$root$">
+          <div *ngIf="!item.isRoot">
             <div class="checkbox" style="padding: 2px 0;">
               <label><input type="checkbox" [(ngModel)]="item.required" name="isRequired"> Required </label>
             </div>
@@ -87,7 +99,7 @@
   <div *ngFor="let item of item.properties">
     <app-schema-row [item]="item"></app-schema-row>
   </div>
-  <div *ngIf="item.items">
-    <app-schema-row [item]="item.items"></app-schema-row>
-  </div>
+</div>
+<div class="indent" *ngIf="item.items">
+  <app-schema-row [item]="item.items"></app-schema-row>
 </div>

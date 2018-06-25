@@ -5,7 +5,9 @@ export interface ISchemaItem {
     required: boolean;
     parent: SchemaObject;
     isArrayItem: boolean;
+
     jsonSchema(): any
+    changeType(type: string): void
 }
 
 export class SchemaBasic implements ISchemaItem{
@@ -28,10 +30,31 @@ export class SchemaBasic implements ISchemaItem{
 
   jsonSchema(): any {
     return {
-        title: this.title,
         description: this.description,
         type: this.type
     };
+  }
+
+  changeType(type: string) {
+    switch (type) {
+      case 'object':
+      case 'array':
+        const valuesToCopy = {
+          title: this.title,
+          description: this.description,
+          type: type
+        }
+        this.parent.properties.forEach((property, index: integer) => {
+          if (property.title === this.title) {
+            this.parent.properties[index] = type === 'object' ? new SchemaObject(valuesToCopy, this.parent) : new SchemaArray(valuesToCopy, this.parent);
+          } else if (property.type === 'array' && property.items.title === this.title) {
+            this.parent.properties[index].items = type === 'object' ? new SchemaObject(valuesToCopy, this.parent) : new SchemaArray(valuesToCopy, this.parent);
+          }
+        });
+        break;
+      default:
+        this.type = type;
+    }
   }
 }
 
@@ -118,7 +141,7 @@ export class SchemaArray extends SchemaBasic implements ISchemaItem {
 
     const itemType = json.items ? json.items.type : undefined;
     const itemContent = json.items || {};
-    switch(json.items.type) {
+    switch(itemType) {
       case 'object':
         this.items = new SchemaObject(itemContent, this.parent);
         break;
