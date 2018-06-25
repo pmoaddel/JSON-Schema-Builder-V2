@@ -23,6 +23,7 @@
             <button class="badge badge-pill badge-primary number" (click)="item.changeType('number')">NUMBER</button>
             <button class="badge badge-pill badge-primary object" (click)="item.changeType('object')">OBJECT</button>
             <button class="badge badge-pill badge-primary array" (click)="item.changeType('array')">ARRAY</button>
+            <button class="badge badge-pill badge-primary boolean" (click)="item.changeType('boolean')">BOOLEAN</button>
           </div>
         </div>
         <span *ngIf="item.isRoot" [ngClass]="item.type" class="badge badge-pill badge-primary">{{item.type.toUpperCase()}}

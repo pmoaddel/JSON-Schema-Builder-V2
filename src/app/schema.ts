@@ -30,30 +30,44 @@ export class SchemaBasic implements ISchemaItem{
 
   jsonSchema(): any {
     return {
-        description: this.description,
-        type: this.type
+      title: this.title,
+      description: this.description,
+      type: this.type
     };
   }
 
   changeType(type: string) {
-    switch (type) {
-      case 'object':
-      case 'array':
-        const valuesToCopy = {
-          title: this.title,
-          description: this.description,
-          type: type
-        }
-        this.parent.properties.forEach((property, index: integer) => {
-          if (property.title === this.title) {
-            this.parent.properties[index] = type === 'object' ? new SchemaObject(valuesToCopy, this.parent) : new SchemaArray(valuesToCopy, this.parent);
-          } else if (property.type === 'array' && property.items.title === this.title) {
-            this.parent.properties[index].items = type === 'object' ? new SchemaObject(valuesToCopy, this.parent) : new SchemaArray(valuesToCopy, this.parent);
+    if (type === this.type) {
+      return;
+    }
+    const needToCreateNewObject : boolean = (type === 'object' || type === 'array' || this.type === 'object' || this.type === 'array');
+    if (needToCreateNewObject) {
+      const valuesToCopy = {
+        title: this.title,
+        description: this.description,
+        type: type,
+        required: this.required
+      }
+      let newObject : ISchemaItem;
+      if (type === 'object') {
+        newObject = new SchemaObject(valuesToCopy, this.parent)
+      } else if (type === 'array') {
+        newObject = new SchemaArray(valuesToCopy, this.parent);
+      } else {
+        newObject = new SchemaBasic(valuesToCopy, this.parent);
+      }
+      this.parent.properties.forEach((property : ISchemaItem, index: number) => {
+        if (property.title === this.title) {
+          this.parent.properties[index] = newObject;
+        } else if (property.type === 'array') {
+          const arrayProperty = property as SchemaArray;
+          if (arrayProperty.items.title === this.title) {
+            arrayProperty.items = newObject;
           }
-        });
-        break;
-      default:
-        this.type = type;
+        }
+      });
+    } else {
+      this.type = type;
     }
   }
 }
@@ -109,6 +123,7 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem {
     };
     this.properties.forEach((property: ISchemaItem) => {
         output.properties[property.title] = property.jsonSchema();
+        delete output.properties[property.title].title;
         if (property.required) {
             output.required.push(property.title);
         }
