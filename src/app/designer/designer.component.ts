@@ -37,8 +37,4 @@ export class DesignerComponent implements OnInit {
   ngOnInit() {
     this.jsonSchema = this.schemaReaderService.workingSchema;
   }
-
-  generateSchema() {
-    this.generatedSchema = JSON.stringify(this.jsonSchema.generateJSONSchema(), null, 2);
-  }
 }

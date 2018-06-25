@@ -3,14 +3,9 @@ export interface ISchemaItem {
     type: string;
     description: string;
     required: boolean;
-    parent: ISchemaItem;
-
-    generateJSONSchema(): any
-}
-
-export interface IHasProperties {
-    properties: ISchemaItem[];
-    removeProperty(title: string): void;
+    parent: SchemaObject;
+    isArrayItem: boolean;
+    jsonSchema(): any
 }
 
 export class SchemaBasic implements ISchemaItem{
@@ -18,11 +13,11 @@ export class SchemaBasic implements ISchemaItem{
   type: string;
   description: string;
   required: boolean;
-  parent: ISchemaItem;
+  parent: SchemaObject;
   format: string;
   isArrayItem: boolean;
 
-  constructor (json: any, parent: ISchemaItem) {
+  constructor (json: any, parent: SchemaObject) {
     this.title = json.title;
     this.description = json.description;
     this.type = json.type || 'string';
@@ -31,7 +26,7 @@ export class SchemaBasic implements ISchemaItem{
     this.isArrayItem = false;
   }
 
-  generateJSONSchema(): any {
+  jsonSchema(): any {
     return {
         title: this.title,
         description: this.description,
@@ -40,12 +35,13 @@ export class SchemaBasic implements ISchemaItem{
   }
 }
 
-export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasProperties {
+export class SchemaObject extends SchemaBasic implements ISchemaItem {
   requiredItems: Array<String>;
   properties: Array<ISchemaItem>;
   isRoot: boolean;
+  schema: string;
 
-  constructor (json: any, parent: ISchemaItem) {
+  constructor (json: any, parent: SchemaObject) {
     super(json, parent);
     this.schema = json.$schema;
 
@@ -79,22 +75,26 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasProper
     }
   }
 
-  generateJSONSchema(): any {
+  jsonSchema(): any {
     let output = {
         $schema: this.schema,
         title: this.title,
         description: this.description,
         type: this.type,
-        required: []
-        properties: {},
-    }
+        required: [],
+        properties: {}
+    };
     this.properties.forEach((property: ISchemaItem) => {
-        output.properties[property.title] = property.generateJSONSchema();
+        output.properties[property.title] = property.jsonSchema();
         if (property.required) {
             output.required.push(property.title);
         }
     });
     return output;
+  }
+
+  jsonSchemaString(): string {
+    return JSON.stringify(this.jsonSchema(), null, 2);
   }
 
   removeProperty(title: string): void {
@@ -108,20 +108,11 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasProper
   }
 }
 
-export class RootSchemaObject extends SchemaObject implements ISchemaItem {
-  schema: string;
-
-  constructor (json: any) {
-    super(json);
-    this.schema = json.$schema;
-  }
-}
-
 export class SchemaArray extends SchemaBasic implements ISchemaItem {
   schema: string;
   items: ISchemaItem;
 
-  constructor (json: any, parent: ISchemaItem) {
+  constructor (json: any, parent: SchemaObject) {
     super(json, parent);
     this.schema = json.$schema;
 
@@ -129,24 +120,24 @@ export class SchemaArray extends SchemaBasic implements ISchemaItem {
     const itemContent = json.items || {};
     switch(json.items.type) {
       case 'object':
-        this.items = new SchemaObject(itemContent, this);
+        this.items = new SchemaObject(itemContent, this.parent);
         break;
       case 'array':
-        this.items = new SchemaArray(itemContent, this);
+        this.items = new SchemaArray(itemContent, this.parent);
         break;
       default:
-        this.items = new SchemaBasic(itemContent, this);
+        this.items = new SchemaBasic(itemContent, this.parent);
     }
     this.items.isArrayItem = true;
   }
-  generateJSONSchema(): any {
+  jsonSchema(): any {
     let output = {
       $schema: this.schema,
       description: this.description,
       type: this.type
     };
     if (this.items) {
-        output['items'] = this.items.generateJSONSchema();
+        output['items'] = this.items.jsonSchema();
     }
     return output;
   }

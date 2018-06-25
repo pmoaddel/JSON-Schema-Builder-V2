@@ -1,5 +1,11 @@
 <div class="container">
-  <app-schema-row [item]="jsonSchema"></app-schema-row>
-  <div class='btn btn-primary' (click)="generateSchema()"> Generate Schema </div>
-  <pre *ngIf="generatedSchema">{{generatedSchema}}</pre>
+  <div class="row">
+    <div class="col-lg-6"> <!-- Left Pane -->
+      <app-schema-row [item]="jsonSchema"></app-schema-row>
+    </div>
+    <div class="col-lg-6"> <!-- Right Pane -->
+      <!-- <div class='btn btn-primary' (click)="generateSchema()"> Generate Schema </div> -->
+      <pre> {{jsonSchema.jsonSchemaString()}}</pre>
+    </div>
+  </div>
 </div>
