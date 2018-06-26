@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { ISchemaItem, SchemaObject } from '../schema';
+import { ISchemaItem, IHasChildren } from '../schema';
 
 @Component({
   selector: 'app-schema-row',
@@ -11,10 +11,10 @@ export class SchemaRowComponent {
   objDetSxpanded: boolean = false;
 
   removeItem(item: ISchemaItem): void {
-    item.parent.removeProperty(item.title);
+    item.parent.removeChild(item.title);
   }
 
-  addNewProp(item: SchemaObject): void {
-    item.addProperty();
+  addNewProp(item: IHasChildren): void {
+    item.addChild();
   }
 }

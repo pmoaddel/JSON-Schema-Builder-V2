@@ -2,30 +2,32 @@ export interface ISchemaItem {
     title: string;
     type: string;
     description: string;
-    required: boolean;
-    parent: SchemaObject;
-    isArrayItem: boolean;
+    isRequired: boolean;
+    parent: IHasChildren;
 
     jsonSchema(): any
     changeType(type: string): void
 }
 
-export class SchemaBasic implements ISchemaItem{
+export interface IHasChildren {
+  removeChild(title: string): void;
+  addChild(): void;
+  getChildren(): ISchemaItem[];
+  replaceChild(newItem: ISchemaItem);
+}
+
+export class SchemaBasic implements ISchemaItem {
   title: string;
   type: string;
   description: string;
-  required: boolean;
-  parent: SchemaObject;
-  format: string;
-  isArrayItem: boolean;
+  isRequired: boolean;
+  parent: IHasChildren;
 
-  constructor (json: any, parent: SchemaObject) {
+  constructor (json: any, parent: IHasChildren) {
     this.title = json.title;
     this.description = json.description;
     this.type = json.type || 'string';
-    this.format = json.format;
     this.parent = parent;
-    this.isArrayItem = false;
   }
 
   jsonSchema(): any {
@@ -46,7 +48,7 @@ export class SchemaBasic implements ISchemaItem{
         title: this.title,
         description: this.description,
         type: type,
-        required: this.required
+        isRequried: this.isRequired
       }
       let newObject : ISchemaItem;
       if (type === 'object') {
@@ -56,35 +58,68 @@ export class SchemaBasic implements ISchemaItem{
       } else {
         newObject = new SchemaBasic(valuesToCopy, this.parent);
       }
-      this.parent.properties.forEach((property : ISchemaItem, index: number) => {
-        if (property.title === this.title) {
-          this.parent.properties[index] = newObject;
-        } else if (property.type === 'array') {
-          const arrayProperty = property as SchemaArray;
-          if (arrayProperty.items.title === this.title) {
-            arrayProperty.items = newObject;
-          }
-        }
-      });
+      this.parent.replaceChild(newObject);
     } else {
       this.type = type;
     }
   }
 }
 
-export class SchemaObject extends SchemaBasic implements ISchemaItem {
+export class SchemaString extends SchemaBasic {
+  minLength: number;
+  maxLength: number;
+  pattern: string;
+  format: string;
+
+  constructor (json: any, parent: IHasChildren) {
+    super(json, parent);
+    this.minLength = json.minLength;
+    this.maxLength = json.maxLength;
+    this.pattern = json.pattern;
+    this.format = json.format;
+  }
+}
+
+export class SchemaNumeric extends SchemaBasic {
+  multipleOf: number;
+  minimum: number;
+  exclusiveMinimum: boolean;
+  maximum: number;
+  exclusiveMaximum: boolean;
+
+  constructor (json: any, parent: IHasChildren) {
+    super(json, parent);
+    this.multipleOf = json.multipleOf;
+    this.minimum = json.minimum;
+    this.exclusiveMinimum = json.exclusiveMinimum;
+    this.maximum = json.maximum;
+    this.exclusiveMaximum = json.exclusiveMaximum;
+  }
+}
+
+export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildren {
   requiredItems: Array<String>;
   properties: Array<ISchemaItem>;
   isRoot: boolean;
   schema: string;
 
-  constructor (json: any, parent: SchemaObject) {
+  additionalProperties: any; // can be boolean or an object
+  minProperties: number;
+  maxProperties: number;
+
+
+  //dependancies: any; TODO: Advanced Feature
+
+  constructor (json: any, parent: IHasChildren) {
     super(json, parent);
     this.schema = json.$schema;
 
     this.properties = [];
     this.isRoot = !parent;
-    this.required = this.isRoot;
+    this.isRequired = this.isRoot;
+    this.additionalProperties = json.additionalPropertiesv;
+    this.minProperties = json.minPropertiesv;
+    this.maxProperties = json.maxPropertiesv;
 
     if (json.properties) {
       Object.entries(json.properties).forEach((entry: any[]) => {
@@ -107,7 +142,7 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem {
         json.required.forEach((requiredItemName) => {
             this.properties.find((property) => {
                 return property.title === requiredItemName;
-            }).required = true;
+            }).isRequired = true;
         });
     }
   }
@@ -124,7 +159,7 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem {
     this.properties.forEach((property: ISchemaItem) => {
         output.properties[property.title] = property.jsonSchema();
         delete output.properties[property.title].title;
-        if (property.required) {
+        if (property.isRequired) {
             output.required.push(property.title);
         }
     });
@@ -135,48 +170,97 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem {
     return JSON.stringify(this.jsonSchema(), null, 2);
   }
 
-  removeProperty(title: string): void {
+  removeChild(title: string): void {
     this.properties = this.properties.filter((property) => {
         return property.title != title;
     });
   }
 
-  addProperty(): void {
+  addChild(): void {
     this.properties.push(new SchemaBasic({}, this));
+  }
+
+  getChildren(): ISchemaItem[] {
+    return this.properties;
+  }
+
+  replaceChild(newItem: ISchemaItem) {
+    this.properties.forEach((item : ISchemaItem, index: number) => {
+      if (item.title === newItem.title) {
+        this.properties[index] = newItem;
+      }
+    });
   }
 }
 
-export class SchemaArray extends SchemaBasic implements ISchemaItem {
+export class SchemaArray extends SchemaBasic implements ISchemaItem, IHasChildren {
   schema: string;
-  items: ISchemaItem;
+  items: ISchemaItem[];
+  additionalItems: boolean;
+  minItems: number;
+  maxItems: number;
+  uniqueItems: boolean;
 
-  constructor (json: any, parent: SchemaObject) {
+  constructor (json: any, parent: IHasChildren) {
     super(json, parent);
     this.schema = json.$schema;
+    this.items = [];
 
-    const itemType = json.items ? json.items.type : undefined;
-    const itemContent = json.items || {};
-    switch(itemType) {
-      case 'object':
-        this.items = new SchemaObject(itemContent, this.parent);
-        break;
-      case 'array':
-        this.items = new SchemaArray(itemContent, this.parent);
-        break;
-      default:
-        this.items = new SchemaBasic(itemContent, this.parent);
-    }
-    this.items.isArrayItem = true;
+    //if nothing
+    let items = json.items || {};
+    items = items.length ? items : [items];
+    items.forEach((item) => {
+      switch(item.type) {
+        case 'object':
+          this.items.push(new SchemaObject(item, this));
+          break;
+        case 'array':
+          this.items.push(new SchemaArray(item, this));
+          break;
+        default:
+          this.items.push(new SchemaBasic(item, this));
+      }
+    });
   }
+
   jsonSchema(): any {
     let output = {
       $schema: this.schema,
       description: this.description,
       type: this.type
     };
-    if (this.items) {
-        output['items'] = this.items.jsonSchema();
+    if (this.items.length) {
+      if (this.items.length > 1) {
+        output['items'] = [];
+        this.items.forEach((item) => {
+          output['items'].push(item.jsonSchema());
+        });
+      } else {
+        output['items'] = this.items[0].jsonSchema();
+      }
     }
     return output;
+  }
+
+  removeChild(title: string): void {
+    this.items = this.items.filter((item) => {
+        return item.title != title;
+    });
+  }
+
+  addChild(): void {
+    this.items.push(new SchemaBasic({}, this));
+  }
+
+  getChildren(): ISchemaItem[] {
+    return this.items;
+  }
+
+  replaceChild(newItem: ISchemaItem) {
+    this.items.forEach((item : ISchemaItem, index: number) => {
+      if (item.title === newItem.title) {
+        this.items[index] = newItem;
+      }
+    });
   }
 }
