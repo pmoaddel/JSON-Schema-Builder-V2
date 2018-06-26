@@ -16,7 +16,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 // Font Awesome Icons
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faCoffee, faChevronRight, faChevronDown, faAsterisk, faPlus, faPencilAlt, faTimes, faCommentAlt, faCheck} from '@fortawesome/free-solid-svg-icons'; //fas
+import { faCoffee, faChevronRight, faChevronDown, faAsterisk, faPlus, faPencilAlt, faTimes, faCommentAlt, faCheck} from '@fortawesome/free-solid-svg-icons';
+import { ItemDetailsComponent } from './item-details/item-details.component'; //fas
 // import { far } from '@fortawesome/free-regular-svg-icons'; //don't need this one currently
 library.add(faCoffee, faChevronRight, faChevronDown, faAsterisk, faPlus, faPencilAlt, faTimes, faCommentAlt, faCheck);
 
@@ -30,7 +31,8 @@ const appRoutes: Routes = [
     AppComponent,
     RawComponent,
     DesignerComponent,
-    SchemaRowComponent
+    SchemaRowComponent,
+    ItemDetailsComponent
   ],
   imports: [
     RouterModule.forRoot(

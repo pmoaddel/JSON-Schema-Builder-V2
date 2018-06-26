@@ -44,58 +44,7 @@
       </div>
     </div>
   </div>
-  <div class="model-det-cont container" *ngIf="showDetailsPan">
-    <div class="row">
-      <div class="col" style="border-right:1px solid #9E9E9E">
-        <div class="t_color bold"> Basic Info </div>
-        <div>
-          <form class="form-horizontal form-compact model-detail-form" name="detailForm" role="form">
-            <div class="form-group">
-              <label class="control-label col-xs-2"> Title: </label>
-              <div class="col-xs-9">
-                <input type="text" class="form-control sm detail-ip" id="foldName" [(ngModel)]="item.title" name="title"> <!-- key? -->
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="control-label col-xs-2"> Description: </label>
-              <div class="col-xs-9">
-                <textarea class="form-control" [(ngModel)]="item.description" name="description"></textarea>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="control-label col-xs-2"> Default: </label>
-              <div class="col-xs-9">
-                <input type="text" class="form-control sm detail-ip" [(ngModel)]="item.default" name="default"/>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-      <div class="col">
-        <form class="form-horizontal form-compact model-detail-form" name="detailForm" role="form">
-          <div class="t_color bold"> Validations: </div>
-          <div *ngIf="!item.isRoot">
-            <div class="checkbox" style="padding: 2px 0;">
-              <label><input type="checkbox" [(ngModel)]="item.isRequired" name="isRequired"> Required </label>
-            </div>
-          </div>
-          <div>
-            <div class="checkbox" style="padding: 2px 0;">
-              <label><input type="checkbox" [(ngModel)]="item._disallowAdditional" name="disallowAdditional"> Disallow Additional Properties </label>
-            </div>
-          </div>
-          <div class="form-group col-xs-12">
-            <label class="model-label-x"> Minimum Properties:</label>
-            <input type="number" class="form-control sm detail-ip" [(ngModel)]="item._minProperties" name="minProperties" min="0" placeholder=">=0" />
-          </div>
-          <div class="form-group col-xs-12">
-            <label class="model-label-x"> Maximum Properties:</label>
-            <input type="number" class="form-control sm detail-ip" [(ngModel)]="item._maxProperties" name="maxProperties" min="0" placeholder=">=0" />
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+  <app-item-details [item]="item" *ngIf="showDetailsPan"></app-item-details>
 </div>
 <div class="indent" *ngIf="objDetSxpanded && item.getChildren">
   <div *ngFor="let item of item.getChildren()">

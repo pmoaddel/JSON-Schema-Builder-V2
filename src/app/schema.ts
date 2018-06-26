@@ -4,6 +4,7 @@ export interface ISchemaItem {
     description: string;
     isRequired: boolean;
     parent: IHasChildren;
+    default: string;
 
     jsonSchema(): any
     changeType(type: string): void
@@ -22,20 +23,25 @@ export class SchemaBasic implements ISchemaItem {
   description: string;
   isRequired: boolean;
   parent: IHasChildren;
+  default: string;
 
   constructor (json: any, parent: IHasChildren) {
     this.title = json.title;
     this.description = json.description;
     this.type = json.type || 'string';
     this.parent = parent;
+    this.default = json.default;
   }
 
   jsonSchema(): any {
-    return {
+    let output = {
       title: this.title,
       description: this.description,
-      type: this.type
+      type: this.type,
+      default: this.default
     };
+    Object.keys(output).forEach((key) => (!output[key]) && delete output[key]);
+    return output;
   }
 
   changeType(type: string) {
@@ -148,14 +154,11 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildr
   }
 
   jsonSchema(): any {
-    let output = {
-        $schema: this.schema,
-        title: this.title,
-        description: this.description,
-        type: this.type,
-        required: [],
-        properties: {}
-    };
+    let output = super.jsonSchema();
+    output.$schema = this.schema;
+    output.required = [];
+    output.properties = {};
+
     this.properties.forEach((property: ISchemaItem) => {
         output.properties[property.title] = property.jsonSchema();
         delete output.properties[property.title].title;
@@ -206,7 +209,6 @@ export class SchemaArray extends SchemaBasic implements ISchemaItem, IHasChildre
     this.schema = json.$schema;
     this.items = [];
 
-    //if nothing
     let items = json.items || {};
     items = items.length ? items : [items];
     items.forEach((item) => {
@@ -224,11 +226,8 @@ export class SchemaArray extends SchemaBasic implements ISchemaItem, IHasChildre
   }
 
   jsonSchema(): any {
-    let output = {
-      $schema: this.schema,
-      description: this.description,
-      type: this.type
-    };
+    let output = super.jsonSchema();
+    output.$schema = this.schema;
     if (this.items.length) {
       if (this.items.length > 1) {
         output['items'] = [];
