@@ -2,7 +2,7 @@
   <div class="row">
     <!-- Basic Info -->
     <div class="col" style="border-right:1px solid #9E9E9E">
-      <div class="t_color bold"> Basic Info </div>
+      <div class="t_color bold"> General </div>
       <div>
         <form class="form-horizontal form-compact model-detail-form" name="detailForm" role="form">
           <div class="form-group">
@@ -23,38 +23,72 @@
               <input type="text" class="form-control sm detail-ip" [(ngModel)]="item.default" name="default"/>
             </div>
           </div>
+          <div *ngIf="!item.isRoot">
+            <div class="form-check" style="padding: 2px 0;">
+              <label><input type="checkbox" [(ngModel)]="item.isRequired" name="isRequired"> Required </label>
+            </div>
+          </div>
         </form>
       </div>
     </div>
   <!-- Type Specfic -->
     <!-- String -->
     <div class="col" *ngIf="item.type === 'string'">
-      <form class="form-horizontal form-compact model-detail-form" name="detailForm" role="form">
-        <div class="t_color bold"> Validations: </div>
-        <div *ngIf="!item.isRoot">
-          <div class="checkbox" style="padding: 2px 0;">
-            <label><input type="checkbox" [(ngModel)]="item.isRequired" name="isRequired"> Required </label>
+      <form>
+        <div class="t_color bold"> Numeric </div>
+        <div class="form-group row">
+          <label class="col-sm-8 col-form-label">Minimum Length:</label>
+          <div class="col-sm-4">
+            <input type="number" class="form-control form-control-sm" [(ngModel)]="item.minLength" name="minLength" min="1"/>
           </div>
         </div>
-        <div>
-          <div class="checkbox" style="padding: 2px 0;">
-            <label><input type="checkbox" [(ngModel)]="item._disallowAdditional" name="disallowAdditional"> Disallow Additional Properties </label>
+        <div class="form-group row">
+          <label class="col-sm-8 col-form-label">Maximum Length:</label>
+          <div class="col-sm-4">
+            <input type="number" class="form-control form-control-sm" [(ngModel)]="item.maxLength" name="maxLength" min="1"/>
           </div>
         </div>
-        <div class="form-group col-xs-12">
-          <label class="model-label-x"> Minimum Properties:</label>
-          <input type="number" class="form-control sm detail-ip" [(ngModel)]="item.minProperties" name="minProperties" min="0" placeholder=">=0" />
+        <div class="form-group">
+          <label> Format: </label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="item.format" name="format"/>
         </div>
-        <div class="form-group col-xs-12">
-          <label class="model-label-x"> Maximum Properties:</label>
-          <input type="number" class="form-control sm detail-ip" [(ngModel)]="item.maxProperties" name="maxProperties" min="0" placeholder=">=0" />
+        <div class="form-group">
+          <label> Pattern: </label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="item.pattern" name="pattern" min="0"/>
         </div>
       </form>
     </div>
-    <!-- Number  -->
 
+    <!-- Number  -->
+    <div class="col" *ngIf="item.type === 'number'">
+      <form>
+        <div class="t_color bold"> String </div>
+        <div class="form-group row">
+          <label class="col-sm-6 col-form-label">Minimum</label>
+          <div class="col-sm-6 ">
+            <input type="number" class="form-control form-control-sm" [(ngModel)]="item.minimum" name="minimum"/>
+          </div>
+          <div class="form-check" style="padding: 2px 0;">
+            <label><input type="checkbox" [(ngModel)]="item.exclusiveMinimum" name="exclusiveMinimum"> Exclusive </label>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label class="col-sm-6 col-form-label">Maximum</label>
+          <div class="col-sm-6 ">
+            <input type="number" class="form-control form-control-sm" [(ngModel)]="item.maximum" name="maximum"/>
+          </div>
+          <div class="form-check" style="padding: 2px 0;">
+            <label><input type="checkbox" [(ngModel)]="item.exclusiveMaximum" name="exclusiveMaximum"> Exclusive </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label> Multiple Of: </label>
+          <input type="number" class="form-control form-control-sm" [(ngModel)]="item.multipleOf" name="multipleOf"/>
+        </div>
+      </form>
+    </div>
     <!-- Object -->
-    <div class="col" *ngIf="item.type === 'object'">
+    <!-- <div class="col" *ngIf="item.type === 'object'">
       <form class="form-horizontal form-compact model-detail-form" name="detailForm" role="form">
         <div class="t_color bold"> Validations: </div>
         <div *ngIf="!item.isRoot">
@@ -76,7 +110,7 @@
           <input type="number" class="form-control sm detail-ip" [(ngModel)]="item.maxProperties" name="maxProperties" min="0" placeholder=">=0" />
         </div>
       </form>
-    </div>
+    </div> -->
     <!-- Array -->
 
   </div>

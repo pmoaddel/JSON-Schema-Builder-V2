@@ -31,16 +31,16 @@ export class SchemaBasic implements ISchemaItem {
     this.type = json.type || 'string';
     this.parent = parent;
     this.default = json.default;
+    this.isRequired = json.isRequired || false;
   }
 
   jsonSchema(): any {
     let output = {
-      title: this.title,
-      description: this.description,
-      type: this.type,
-      default: this.default
+      title: this.title ? this.title : undefined,
+      description: this.description ? this.description : undefined,
+      type: this.type ? this.type : undefined,
+      default: this.default ? this.default : undefined
     };
-    Object.keys(output).forEach((key) => (!output[key]) && delete output[key]);
     return output;
   }
 
@@ -48,19 +48,25 @@ export class SchemaBasic implements ISchemaItem {
     if (type === this.type) {
       return;
     }
-    const needToCreateNewObject : boolean = (type === 'object' || type === 'array' || this.type === 'object' || this.type === 'array');
+    const needToCreateNewObject : boolean = (
+      type === 'string' || type === 'number' || type === 'integer' || type === 'object' || type === 'array' ||
+      this.type === 'string' || this.type === 'number' || this.type === 'integer' || this.type === 'object' || this.type === 'array');
     if (needToCreateNewObject) {
       const valuesToCopy = {
         title: this.title,
         description: this.description,
         type: type,
-        isRequried: this.isRequired
+        isRequired: this.isRequired
       }
       let newObject : ISchemaItem;
       if (type === 'object') {
         newObject = new SchemaObject(valuesToCopy, this.parent)
       } else if (type === 'array') {
         newObject = new SchemaArray(valuesToCopy, this.parent);
+      } else if (type === 'string') {
+        newObject = new SchemaString(valuesToCopy, this.parent);
+      } else if (type === 'number' || type === 'integer') {
+        newObject = new SchemaNumeric(valuesToCopy, this.parent);
       } else {
         newObject = new SchemaBasic(valuesToCopy, this.parent);
       }
@@ -84,6 +90,16 @@ export class SchemaString extends SchemaBasic {
     this.pattern = json.pattern;
     this.format = json.format;
   }
+
+  jsonSchema(): any {
+    let output = super.jsonSchema();
+    output.minLength = this.minLength ? this.minLength : undefined;
+    output.maxLength = this.maxLength ? this.maxLength : undefined;
+    output.pattern = this.pattern ? this.pattern : undefined;
+    output.format = this.format ? this.format : undefined;
+    return output;
+  }
+
 }
 
 export class SchemaNumeric extends SchemaBasic {
@@ -100,6 +116,16 @@ export class SchemaNumeric extends SchemaBasic {
     this.exclusiveMinimum = json.exclusiveMinimum;
     this.maximum = json.maximum;
     this.exclusiveMaximum = json.exclusiveMaximum;
+  }
+
+  jsonSchema(): any {
+    let output = super.jsonSchema();
+    output.multipleOf = this.multipleOf ? this.multipleOf : undefined;
+    output.minimum = this.minimum ? this.minimum : undefined;
+    output.exclusiveMinimum = this.exclusiveMinimum ? this.exclusiveMinimum : undefined;
+    output.maximum = this.maximum ? this.maximum : undefined;
+    output.exclusiveMaximum = this.exclusiveMaximum ? this.exclusiveMaximum : undefined;
+    return output;
   }
 }
 
@@ -138,6 +164,13 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildr
             break;
           case 'array':
             this.properties.push(new SchemaArray(value, this));
+            break;
+          case 'string':
+            this.properties.push(new SchemaString(value, this));
+            break;
+          case 'integer':
+          case 'number':
+            this.properties.push(new SchemaNumeric(value, this));
             break;
           default:
             this.properties.push(new SchemaBasic(value, this));
@@ -218,6 +251,13 @@ export class SchemaArray extends SchemaBasic implements ISchemaItem, IHasChildre
           break;
         case 'array':
           this.items.push(new SchemaArray(item, this));
+          break;
+        case 'string':
+          this.items.push(new SchemaString(item, this));
+          break;
+        case 'integer':
+        case 'number':
+          this.items.push(new SchemaNumeric(item, this));
           break;
         default:
           this.items.push(new SchemaBasic(item, this));

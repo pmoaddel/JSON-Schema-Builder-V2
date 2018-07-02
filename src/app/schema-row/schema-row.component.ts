@@ -8,7 +8,7 @@ import { ISchemaItem, IHasChildren } from '../schema';
 })
 export class SchemaRowComponent {
   @Input() item: ISchemaItem;
-  objDetSxpanded: boolean = false;
+  objDetSxpanded: boolean = true;
 
   removeItem(item: ISchemaItem): void {
     item.parent.removeChild(item.title);
