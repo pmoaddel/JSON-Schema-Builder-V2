@@ -135,7 +135,8 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildr
   isRoot: boolean;
   schema: string;
 
-  additionalProperties: any; // can be boolean or an object
+  canHaveAdditionalProperties: boolean;
+  additionalProperties: any;
   minProperties: number;
   maxProperties: number;
 
@@ -149,9 +150,17 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildr
     this.properties = [];
     this.isRoot = !parent;
     this.isRequired = this.isRoot;
-    this.additionalProperties = json.additionalPropertiesv;
-    this.minProperties = json.minPropertiesv;
-    this.maxProperties = json.maxPropertiesv;
+
+    if (typeof(json.additionalProperties) === 'boolean') {
+      this.canHaveAdditionalProperties = json.additionalProperties;
+    } else if (json.additionalProperties) {
+      this.canHaveAdditionalProperties = true;
+      this.additionalProperties = json.additionalProperties;
+    } else {
+      this.canHaveAdditionalProperties = false;
+    }
+    this.minProperties = json.minProperties;
+    this.maxProperties = json.maxProperties;
 
     if (json.properties) {
       Object.entries(json.properties).forEach((entry: any[]) => {
@@ -188,9 +197,12 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildr
 
   jsonSchema(): any {
     let output = super.jsonSchema();
-    output.$schema = this.schema;
+    output.$schema = this.schema ? this.schema : undefined;
     output.required = [];
     output.properties = {};
+    output.minProperties = this.minProperties ? this.minProperties : undefined;
+    output.maxProperties = this.maxProperties ? this.maxProperties : undefined;
+    output.additionalProperties = this.additionalProperties ? this.additionalProperties : this.canHaveAdditionalProperties;
 
     this.properties.forEach((property: ISchemaItem) => {
         output.properties[property.title] = property.jsonSchema();
@@ -268,6 +280,11 @@ export class SchemaArray extends SchemaBasic implements ISchemaItem, IHasChildre
   jsonSchema(): any {
     let output = super.jsonSchema();
     output.$schema = this.schema;
+    output.additionalItems = this.additionalItems;
+    output.minItems = this.minItems ? this.minItems : undefined;
+    output.maxItems = this.maxItems ? this.maxItems : undefined;
+    output.uniqueItems = this.uniqueItems;
+
     if (this.items.length) {
       if (this.items.length > 1) {
         output['items'] = [];
