@@ -11,9 +11,20 @@ import { testData } from '../assets/testData.js';
 export class AppComponent {
   title: string = 'JSON Schema Builder V2';
   activeTab: string;
+  loadedFile: string;
 
   constructor(
     private schemaReaderService: SchemaReaderService) { }
+
+  onFilesAdded() {
+    const files = document.getElementById('file').files;
+    const fr = new FileReader();
+    fr.onload = (e) => {
+      const result = JSON.parse(e.target.result);
+      this.schemaReaderService.loadSchema(result);
+    }
+    fr.readAsText(files.item(0));
+  }
 
   ngOnInit() {
     this.schemaReaderService.loadSchema(testData);
