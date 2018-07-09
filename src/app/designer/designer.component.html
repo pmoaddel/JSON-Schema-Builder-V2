@@ -5,7 +5,7 @@
     </div>
     <div class="col-lg-6"> <!-- Right Pane -->
       <div class="card card-body bg-light">
-        <pre> {{schemaReaderService.workingSchema.jsonSchemaString()}}</pre>
+        <pre *ngIf="schemaReaderService.workingSchema"> {{schemaReaderService.workingSchema.jsonSchemaString()}}</pre>
       </div>
     </div>
   </div>

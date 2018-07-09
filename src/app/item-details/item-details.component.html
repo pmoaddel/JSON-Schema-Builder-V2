@@ -1,7 +1,15 @@
 <div class="model-det-cont container">
   <div class="row">
     <!-- Basic Info -->
-    <div class="col" style="border-right:1px solid #9E9E9E">
+    <div *ngIf="item.type === '$ref'" class="col">
+      <div class="form-group">
+        <label class="control-label col-xs-2"> Reference: </label>
+        <div class="col-xs-9">
+          <input type="text" class="form-control sm detail-ip" [(ngModel)]="item.$ref" name="ref">
+        </div>
+      </div>
+    </div>
+    <div *ngIf="item.type != '$ref'" class="col" style="border-right:1px solid #9E9E9E">
       <div class="t_color bold"> General </div>
       <div>
         <form class="form-horizontal form-compact model-detail-form" name="detailForm" role="form">
@@ -59,7 +67,7 @@
       </form>
     </div>
     <!-- Number  -->
-    <div class="col" *ngIf="item.type === 'number'">
+    <div class="col" *ngIf="item.type === 'number' || item.type === 'integer'">
       <form>
         <div class="t_color bold"> String </div>
         <div class="form-group row">

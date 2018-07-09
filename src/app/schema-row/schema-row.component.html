@@ -21,10 +21,12 @@
           <div ngbDropdownMenu class="type-selector" aria-labelledby="dropdownItemType">
             <button class="badge badge-pill badge-primary string" (click)="item.changeType('string')">STRING</button>
             <button class="badge badge-pill badge-primary number" (click)="item.changeType('number')">NUMBER</button>
+            <button class="badge badge-pill badge-primary integer" (click)="item.changeType('integer')">INTEGER</button>
             <button class="badge badge-pill badge-primary object" (click)="item.changeType('object')">OBJECT</button>
             <button class="badge badge-pill badge-primary array" (click)="item.changeType('array')">ARRAY</button>
             <button class="badge badge-pill badge-primary boolean" (click)="item.changeType('boolean')">BOOLEAN</button>
             <button class="badge badge-pill badge-primary null" (click)="item.changeType('null')">NULL</button>
+            <button class="badge badge-pill badge-primary $ref" (click)="item.changeType('$ref')">$ref</button>
           </div>
         </div>
         <span *ngIf="item.isRoot" [ngClass]="item.type" class="badge badge-pill badge-primary">{{item.type.toUpperCase()}}
