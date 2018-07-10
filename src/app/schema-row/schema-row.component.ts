@@ -11,7 +11,7 @@ export class SchemaRowComponent {
   objDetSxpanded: boolean = true;
 
   removeItem(item: ISchemaItem): void {
-    item.parent.removeChild(item.title);
+    item.parent.removeChild(item._id);
   }
 
   addNewProp(item: IHasChildren): void {

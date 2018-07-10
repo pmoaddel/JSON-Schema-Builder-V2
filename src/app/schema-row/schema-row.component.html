@@ -7,13 +7,14 @@
           <fa-icon class="t_color" *ngIf="!objDetSxpanded" icon="chevron-right"></fa-icon>
         </div>
       </div>
-      <input class="model-title" type="text" [(ngModel)]="item.title" name="title"/>
+      <input *ngIf="!item.isDefinition" class="model-title" type="text" [(ngModel)]="item.title" placeholder="<Title>" name="title"/>
+      <input *ngIf="item.isDefinition" class="model-title" type="text" [(ngModel)]="item.definitionName" placeholder="<Definition Name>" name="definitionName"/>
     </div>
     <div class="model-icons">
       <div class="model-info">
         <div ngbDropdown *ngIf="!item.isRoot" class="d-inline-block">
           <button [ngClass]="item.type" class="badge badge-pill badge-primary" id="dropdownItemType" ngbDropdownToggle>
-            {{item.type.toUpperCase()}}
+            {{item.type}}
             <span class="object-prop-count">
               <span *ngIf="item.properties">({{item.properties.length}})</span>
             </span>
@@ -31,7 +32,7 @@
         </div>
         <span *ngIf="item.isRoot" [ngClass]="item.type" class="badge badge-pill badge-primary">{{item.type.toUpperCase()}}
           <span class="object-prop-count">
-            <span *ngIf="item.properties">({{item.properties.length}})</span>
+            <span *ngIf="item.properties">({{item.getChildren().length}})</span>
           </span>
         </span>
         <ng-template #tipContent>{{item.isRequired ? 'Required' : 'Not Required'}}</ng-template>
@@ -51,5 +52,14 @@
 <div class="indent" *ngIf="objDetSxpanded && item.getChildren">
   <div *ngFor="let item of item.getChildren()">
     <app-schema-row [item]="item"></app-schema-row>
+  </div>
+</div>
+<div *ngIf="item.definitions">
+  <h5> Definitions </h5>
+  <div *ngFor="let definition of item.getDefinitions()">
+    <app-schema-row [item]="definition"></app-schema-row>
+  </div>
+  <div class="text-center">
+    <button class="btn btn-secondary btn-sm" (click)="item.addDefinition()"><fa-icon icon="plus" class="obj-add"></fa-icon> Add Definition</button>
   </div>
 </div>

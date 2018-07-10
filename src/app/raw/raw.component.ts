@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { testData } from '../../assets/testData.js';
 
 @Component({
   selector: 'app-raw',
@@ -11,9 +10,4 @@ export class RawComponent implements OnInit {
 
   constructor(
   ) { }
-
-  ngOnInit() {
-    this.rawJSON = JSON.stringify(testData, null, 1);
-  }
-
 }

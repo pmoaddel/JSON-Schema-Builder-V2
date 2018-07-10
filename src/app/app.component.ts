@@ -29,7 +29,6 @@ export class AppComponent {
 
   loadTestSchema(): void {
     $.getJSON( '../assets/testData1.js', (data) => {
-      console.log('json loaded', data);
       this.schemaReaderService.loadSchema(data);
     });
   }

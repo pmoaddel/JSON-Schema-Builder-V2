@@ -5,16 +5,61 @@ export interface ISchemaItem {
     isRequired: boolean;
     parent: IHasChildren;
     default: string;
+    _id: string;
+    //for definitions only
+    definitionName: string;
+    isDefinition: boolean;
 
     jsonSchema(): any
     changeType(type: string): void
 }
 
 export interface IHasChildren {
-  removeChild(title: string): void;
+  removeChild(_id: string, type: string): void;
   addChild(): void;
   getChildren(): ISchemaItem[];
   replaceChild(newItem: ISchemaItem);
+}
+
+function _createAppropriateSchemaItem(json: any, parent: IHasChildren) : ISchemaItem {
+  if (json.$ref) {
+    return new SchemaReference(json, parent);
+  } else {
+    let mainType;
+    if (Array.isArray(json.type)) {
+      mainType = json.type.find((item) => {
+        return item !== 'null';
+      });
+    } else {
+      mainType = json.type;
+    }
+    switch(mainType) {
+      case 'object':
+        return new SchemaObject(json, parent);
+        break;
+      case 'array':
+        return new SchemaArray(json, parent);
+        break;
+      case 'string':
+        return new SchemaString(json, parent);
+        break;
+      case 'integer':
+      case 'number':
+        return new SchemaNumeric(json, parent);
+        break;
+      default:
+        return new SchemaBasic(json, parent);
+    }
+  }
+}
+
+function _generateId() {
+    let placeholder = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
+
+    return placeholder.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 
 export class SchemaBasic implements ISchemaItem {
@@ -24,23 +69,56 @@ export class SchemaBasic implements ISchemaItem {
   isRequired: boolean;
   parent: IHasChildren;
   default: string;
+  isNullable: boolean;
+  _id: string;
+  definitionName: string;
+
 
   constructor (json: any, parent: IHasChildren) {
+    if (json._id) {
+      this._id = json._id;
+    } else {
+      this._id = _generateId();
+    }
     this.title = json.title;
     this.description = json.description;
-    this.type = json.type || 'string';
     this.parent = parent;
     this.default = json.default;
     this.isRequired = json.isRequired || false;
+    this.definitionName = json.definitionName;
+    this.isDefinition = json.isDefinition;
+
+    if (Array.isArray(json.type)) {
+      if (json.type.length > 2) {
+        console.error('more than two types not supported');
+      }
+      if (!json.type.includes('null')) {
+        console.error('multiple types can only include null and an additional value')
+      }
+
+      json.type.forEach((typeItem) => {
+        if (typeItem === 'null') {
+          this.isNullable = true;
+        } else {
+          this.type = typeItem;
+        }
+      }
+    } else {
+      this.type = json.type || 'string';
+    }
   }
 
   jsonSchema(): any {
     let output = {
       title: this.title ? this.title : undefined,
       description: this.description ? this.description : undefined,
-      type: this.type ? this.type : undefined,
       default: this.default ? this.default : undefined
     };
+    if (this.isNullable) {
+      output.type = [this.type, 'null'];
+    } else {
+      output.type = this.type;
+    }
     return output;
   }
 
@@ -62,22 +140,12 @@ export class SchemaBasic implements ISchemaItem {
         title: this.title,
         description: this.description,
         type: type,
-        isRequired: this.isRequired
+        isRequired: this.isRequired,
+        _id: this._id,
+        definitionName: this.definitionName,
+        isDefinition: this.isDefinition
       }
-      let newObject : ISchemaItem;
-      if (type === 'object') {
-        newObject = new SchemaObject(valuesToCopy, this.parent)
-      } else if (type === 'array') {
-        newObject = new SchemaArray(valuesToCopy, this.parent);
-      } else if (type === 'string') {
-        newObject = new SchemaString(valuesToCopy, this.parent);
-      } else if (type === 'number' || type === 'integer') {
-        newObject = new SchemaNumeric(valuesToCopy, this.parent);
-      } else if (type === '$ref') {
-        newObject = new SchemaReference(valuesToCopy, this.parent);
-      } else {
-        newObject = new SchemaBasic(valuesToCopy, this.parent);
-      }
+      let newObject : ISchemaItem = _createAppropriateSchemaItem(valuesToCopy, this.parent);
       this.parent.replaceChild(newObject);
     } else {
       this.type = type;
@@ -107,7 +175,6 @@ export class SchemaString extends SchemaBasic {
     output.format = this.format ? this.format : undefined;
     return output;
   }
-
 }
 
 export class SchemaNumeric extends SchemaBasic {
@@ -154,17 +221,16 @@ export class SchemaReference extends SchemaBasic {
 }
 
 export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildren {
-  requiredItems: Array<String>;
-  properties: Array<ISchemaItem>;
+  requiredItems: String[];
+  properties: ISchemaItem[];
   isRoot: boolean;
   schema: string;
-  definitions: any;
+  definitions: ISchemaItem[];
 
   canHaveAdditionalProperties: boolean;
   additionalProperties: any;
   minProperties: number;
   maxProperties: number;
-
 
   //dependancies: any; TODO: Advanced Feature
 
@@ -172,10 +238,9 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildr
     super(json, parent);
     this.schema = json.$schema;
 
-    this.properties = [];
+    this.properties = {};
     this.isRoot = !parent;
     this.isRequired = this.isRoot;
-    this.definitions = this.definitions;
 
     if (typeof(json.additionalProperties) === 'boolean') {
       this.canHaveAdditionalProperties = json.additionalProperties;
@@ -192,36 +257,29 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildr
       Object.entries(json.properties).forEach((entry: any[]) => {
         let key: string= entry[0];
         let value: any = entry[1];
-        value.title = key;
-        if (value.$ref) {
-          this.properties.push(new SchemaReference(value, this));
-        } else {
-          switch(value.type) {
-            case 'object':
-              this.properties.push(new SchemaObject(value, this));
-              break;
-            case 'array':
-              this.properties.push(new SchemaArray(value, this));
-              break;
-            case 'string':
-              this.properties.push(new SchemaString(value, this));
-              break;
-            case 'integer':
-            case 'number':
-              this.properties.push(new SchemaNumeric(value, this));
-              break;
-            default:
-              this.properties.push(new SchemaBasic(value, this));
-          }
-        }
+        value.title = key
+        const newProperty = _createAppropriateSchemaItem(value, this);
+        this.properties[newProperty._id] = newProperty;
       });
     }
     if (json.required) {
-        json.required.forEach((requiredItemName) => {
-            this.properties.find((property) => {
-                return property.title === requiredItemName;
-            }).isRequired = true;
-        });
+      json.required.forEach((requiredItemName) => {
+          this.properties.find((property) => {
+              return property.title === requiredItemName;
+          }).isRequired = true;
+      });
+    }
+    if (json.definitions) {
+      this.definitions = {}
+      Object.entries(json.definitions).forEach((keyVal) => {
+        const key = keyVal[0];
+        const value = keyVal[1];
+        value.definitionName = key;
+        value.isDefinition = true;
+        const definition = _createAppropriateSchemaItem(value, this);
+        this.definitions[definition._id] = definition
+      });
+
     }
   }
 
@@ -234,13 +292,22 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildr
     output.maxProperties = this.maxProperties ? this.maxProperties : undefined;
     output.additionalProperties = this.additionalProperties ? this.additionalProperties : this.canHaveAdditionalProperties;
 
-    this.properties.forEach((property: ISchemaItem) => {
+    Object.values(this.properties).forEach((property: ISchemaItem) => {
         output.properties[property.title] = property.jsonSchema();
         delete output.properties[property.title].title;
         if (property.isRequired) {
             output.required.push(property.title);
         }
     });
+
+    if (this.definitions && Object.values(this.definitions).length) {
+      output.definitions = {}
+      Object.entries(this.definitions).forEach((keyValue) => {
+        const key = keyValue[0];
+        const value = keyValue[1];
+        output.definitions[value.definitionName] = keyValue[1].jsonSchema();
+      });
+    }
     return output;
   }
 
@@ -248,27 +315,39 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildr
     return JSON.stringify(this.jsonSchema(), null, 2);
   }
 
-  removeChild(title: string): void {
-    this.properties = this.properties.filter((property) => {
-        return property.title != title;
-    });
+  removeChild(_id: string): void {
+    if (this.properties[_id]) {
+      delete this.properties[_id];
+    } else if (this.definitions[_id]){
+      delete this.definitions[_id];
+    }
   }
 
   addChild(): void {
-    const title = 'Property ' + (this.getChildren().length + 1);
-    this.properties.push(new SchemaBasic({ title }, this));
+    const newProp = new SchemaBasic({}, this)
+    this.properties[newProp._id] = newProp;
   }
 
   getChildren(): ISchemaItem[] {
-    return this.properties;
+    return Object.values(this.properties);
   }
 
   replaceChild(newItem: ISchemaItem) {
-    this.properties.forEach((item : ISchemaItem, index: number) => {
-      if (item.title === newItem.title) {
-        this.properties[index] = newItem;
-      }
-    });
+    if (this.properties[newItem._id]) {
+      this.properties[newItem._id] = newItem;
+    } else if (this.definitions[newItem._id]){
+      this.definitions[newItem._id] = newItem;
+    }
+  }
+
+  getDefinitions(): ISchemaItem[] {
+    return Object.values(this.definitions);
+  }
+
+  addDefinition() {
+    const newDef = new SchemaBasic({}, this);
+    newDef.isDefinition = true;
+    this.definitions[newDef._id] = newDef
   }
 }
 
@@ -288,23 +367,7 @@ export class SchemaArray extends SchemaBasic implements ISchemaItem, IHasChildre
     let items = json.items || { title: 'Item 1' };
     items = items.length ? items : [items];
     items.forEach((item) => {
-      switch(item.type) {
-        case 'object':
-          this.items.push(new SchemaObject(item, this));
-          break;
-        case 'array':
-          this.items.push(new SchemaArray(item, this));
-          break;
-        case 'string':
-          this.items.push(new SchemaString(item, this));
-          break;
-        case 'integer':
-        case 'number':
-          this.items.push(new SchemaNumeric(item, this));
-          break;
-        default:
-          this.items.push(new SchemaBasic(item, this));
-      }
+      this.items.push(_createAppropriateSchemaItem(item, this));
     });
   }
 
@@ -329,9 +392,9 @@ export class SchemaArray extends SchemaBasic implements ISchemaItem, IHasChildre
     return output;
   }
 
-  removeChild(title: string): void {
+  removeChild(id: string): void {
     this.items = this.items.filter((item) => {
-        return item.title != title;
+        return item._id != id;
     });
   }
 
