@@ -17,6 +17,17 @@
     },
     "groupFilter": {
       "$ref": "#/definitions/purecloudGroupIdFilterList"
+    },
+    "numbertype": {
+      "default": "widget",
+      "description": "Dictates the way the application will appear and function inside of PureCloud",
+      "type": "number",
+      "title": "Application Type",
+      "enum": [
+        1,
+        2,
+        3
+      ]
     }
   },
   "additionalProperties": false,

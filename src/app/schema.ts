@@ -5,6 +5,7 @@ export interface ISchemaItem {
     isRequired: boolean;
     parent: IHasChildren;
     default: string;
+    enum: Array;
     _id: string;
     //for definitions only
     definitionName: string;
@@ -72,7 +73,7 @@ export class SchemaBasic implements ISchemaItem {
   isNullable: boolean;
   _id: string;
   definitionName: string;
-
+  enum: Array;
 
   constructor (json: any, parent: IHasChildren) {
     if (json._id) {
@@ -88,6 +89,18 @@ export class SchemaBasic implements ISchemaItem {
     this.definitionName = json.definitionName;
     this.isDefinition = json.isDefinition;
 
+    // construct enum array
+    this.enum = [];
+    if (json.enum) {
+      json.enum.forEach((enumValue) => {
+        this.enum.push({
+          value: enumValue,
+          type: typeof(enumValue)
+        });
+      });
+    };
+
+    // handle types
     if (Array.isArray(json.type)) {
       if (json.type.length > 2) {
         console.error('more than two types not supported');
@@ -104,20 +117,37 @@ export class SchemaBasic implements ISchemaItem {
         }
       }
     } else {
-      this.type = json.type || 'string';
+      this.type = (json.type || 'string');
     }
+  }
+
+  addEnumValue() {
+    this.enum.push({});
+  }
+
+  removeEnumValue(index) {
+    this.enum.splice(index, 1);
   }
 
   jsonSchema(): any {
     let output = {
       title: this.title ? this.title : undefined,
       description: this.description ? this.description : undefined,
-      default: this.default ? this.default : undefined
+      default: this.default ? this.default : undefined,
     };
     if (this.isNullable) {
       output.type = [this.type, 'null'];
     } else {
       output.type = this.type;
+    }
+    if (this.enum && this.enum.length) {
+      output.enum = this.enum.map((enumObject) => {
+        if (enumObject.type === "number") {
+          return Number(enumObject.value)
+        } else {
+          return enumObject.value;
+        }
+      });
     }
     return output;
   }
@@ -329,7 +359,7 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildr
   }
 
   getChildren(): ISchemaItem[] {
-    return Object.values(this.properties);
+    return Object.values(this.properties) || [];
   }
 
   replaceChild(newItem: ISchemaItem) {
@@ -341,7 +371,7 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildr
   }
 
   getDefinitions(): ISchemaItem[] {
-    return Object.values(this.definitions);
+    return this.definitions ? Object.values(this.definitions) : [];
   }
 
   addDefinition() {

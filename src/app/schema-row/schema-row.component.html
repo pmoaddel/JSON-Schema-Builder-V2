@@ -47,19 +47,10 @@
       </div>
     </div>
   </div>
-  <app-item-details [item]="item" *ngIf="showDetailsPan"></app-item-details>
+  <app-item-details class="item-details" [item]="item" *ngIf="showDetailsPan"></app-item-details>
 </div>
 <div class="indent" *ngIf="objDetSxpanded && item.getChildren">
   <div *ngFor="let item of item.getChildren()">
     <app-schema-row [item]="item"></app-schema-row>
-  </div>
-</div>
-<div *ngIf="item.definitions">
-  <h5> Definitions </h5>
-  <div *ngFor="let definition of item.getDefinitions()">
-    <app-schema-row [item]="definition"></app-schema-row>
-  </div>
-  <div class="text-center">
-    <button class="btn btn-secondary btn-sm" (click)="item.addDefinition()"><fa-icon icon="plus" class="obj-add"></fa-icon> Add Definition</button>
   </div>
 </div>

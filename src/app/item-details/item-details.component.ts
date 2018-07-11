@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { ISchemaItem } from '../schema';
 
 @Component({
@@ -6,8 +6,13 @@ import { ISchemaItem } from '../schema';
   templateUrl: './item-details.component.html',
   styleUrls: ['./item-details.component.less']
 })
-export class ItemDetailsComponent {
+export class ItemDetailsComponent implements OnChanges{
   @Input() item: ISchemaItem;
+  enumCtrlExpanded: bool;
 
-  constructor() { }
+  ngOnChanges() {
+    if (this.item.enum && this.item.enum.length) {
+      this.enumCtrlExpanded = true;
+    }
+  }
 }

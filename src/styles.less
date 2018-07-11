@@ -201,11 +201,33 @@
 	.unspecified {
 		background-color: @background_color_8;
 	}
-	.model-det-cont {
-		background: #f5f5f5;
-		padding: 10px;
-	}
-	form.model-detail-form {
+  .item-details {
+    direction: rtl;
+
+    .model-det-cont {
+      direction: ltr;
+      background: #f5f5f5;
+      padding: 10px;
+      min-width: 450px;
+    }
+
+    .enum-control-bar {
+      display: flex;
+      align-items: flex-end;
+      cursor: pointer;
+    }
+
+    .enum-row {
+      display: flex;
+      align-items: center;
+
+      input {
+        height: 30px;
+      }
+    }
+  }
+
+  form.model-detail-form {
 		.control-label {
 			padding: 0 5px;
 		}
