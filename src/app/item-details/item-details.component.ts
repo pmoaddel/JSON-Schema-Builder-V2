@@ -8,7 +8,7 @@ import { ISchemaItem } from '../schema';
 })
 export class ItemDetailsComponent implements OnChanges{
   @Input() item: ISchemaItem;
-  enumCtrlExpanded: bool;
+  enumCtrlExpanded: boolean;
 
   ngOnChanges() {
     if (this.item.enum && this.item.enum.length) {

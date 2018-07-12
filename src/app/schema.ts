@@ -16,7 +16,7 @@ export interface ISchemaItem {
 }
 
 export interface IHasChildren {
-  removeChild(_id: string, type: string): void;
+  removeChild(_id: string): void;
   addChild(): void;
   getChildren(): ISchemaItem[];
   replaceChild(newItem: ISchemaItem);
@@ -298,9 +298,9 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildr
     }
     if (json.definitions) {
       this.definitions = {}
-      Object.entries(json.definitions).forEach((keyVal) => {
-        const key = keyVal[0];
-        const value = keyVal[1];
+      Object.entries(json.definitions).forEach((keyVal: [string, ISchemaItem]) => {
+        const key: string = keyVal[0];
+        const value: ISchemaItem = keyVal[1];
         value.definitionName = key;
         value.isDefinition = true;
         const definition = _createAppropriateSchemaItem(value, this);
