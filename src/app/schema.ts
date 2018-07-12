@@ -1,18 +1,18 @@
 export interface ISchemaItem {
-    title: string;
-    type: string;
-    description: string;
-    isRequired: boolean;
-    parent: IHasChildren;
-    default: string;
-    enum: Array;
-    _id: string;
-    //for definitions only
-    definitionName: string;
-    isDefinition: boolean;
+  title: string;
+  type: string;
+  description: string;
+  isRequired: boolean;
+  parent: IHasChildren;
+  default: string;
+  enum: any[];
+  _id: string;
+  //for definitions only
+  definitionName: string;
+  isDefinition: boolean;
 
-    jsonSchema(): any
-    changeType(type: string): void
+  jsonSchema(): any
+  changeType(type: string): void
 }
 
 export interface IHasChildren {
@@ -37,17 +37,13 @@ function _createAppropriateSchemaItem(json: any, parent: IHasChildren) : ISchema
     switch(mainType) {
       case 'object':
         return new SchemaObject(json, parent);
-        break;
       case 'array':
         return new SchemaArray(json, parent);
-        break;
       case 'string':
         return new SchemaString(json, parent);
-        break;
       case 'integer':
       case 'number':
         return new SchemaNumeric(json, parent);
-        break;
       default:
         return new SchemaBasic(json, parent);
     }
@@ -55,12 +51,12 @@ function _createAppropriateSchemaItem(json: any, parent: IHasChildren) : ISchema
 }
 
 function _generateId() {
-    let placeholder = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
+  let placeholder = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
 
-    return placeholder.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+  return placeholder.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+  });
 }
 
 export class SchemaBasic implements ISchemaItem {
@@ -73,7 +69,8 @@ export class SchemaBasic implements ISchemaItem {
   isNullable: boolean;
   _id: string;
   definitionName: string;
-  enum: Array;
+  isDefinition: boolean;
+  enum: any[];
 
   constructor (json: any, parent: IHasChildren) {
     if (json._id) {
@@ -98,7 +95,7 @@ export class SchemaBasic implements ISchemaItem {
           type: typeof(enumValue)
         });
       });
-    };
+    }
 
     // handle types
     if (Array.isArray(json.type)) {
@@ -109,15 +106,15 @@ export class SchemaBasic implements ISchemaItem {
         console.error('multiple types can only include null and an additional value')
       }
 
-      json.type.forEach((typeItem) => {
+      json.type.forEach((typeItem: string) => {
         if (typeItem === 'null') {
           this.isNullable = true;
         } else {
           this.type = typeItem;
         }
-      }
+      });
     } else {
-      this.type = (json.type || 'string');
+      this.type = json.type || 'string';
     }
   }
 
@@ -130,7 +127,7 @@ export class SchemaBasic implements ISchemaItem {
   }
 
   jsonSchema(): any {
-    let output = {
+    let output: any = {
       title: this.title ? this.title : undefined,
       description: this.description ? this.description : undefined,
       default: this.default ? this.default : undefined,
@@ -153,7 +150,7 @@ export class SchemaBasic implements ISchemaItem {
   }
 
   changeType(type: string) {
-    const complexTypes = [
+    const complexTypes: string[] = [
       'string',
       'number',
       'integer',
@@ -252,10 +249,10 @@ export class SchemaReference extends SchemaBasic {
 
 export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildren {
   requiredItems: String[];
-  properties: ISchemaItem[];
+  properties: { [id: string]: ISchemaItem };
   isRoot: boolean;
   schema: string;
-  definitions: ISchemaItem[];
+  definitions: { [id: string]: ISchemaItem };
 
   canHaveAdditionalProperties: boolean;
   additionalProperties: any;
@@ -293,8 +290,8 @@ export class SchemaObject extends SchemaBasic implements ISchemaItem, IHasChildr
       });
     }
     if (json.required) {
-      json.required.forEach((requiredItemName) => {
-          this.properties.find((property) => {
+      json.required.forEach((requiredItemName: string) => {
+          Object.values(this.properties).find((property: ISchemaItem) => {
               return property.title === requiredItemName;
           }).isRequired = true;
       });
