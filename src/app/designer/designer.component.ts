@@ -8,12 +8,17 @@ import { SchemaReaderService } from './schema-reader.service';
   styleUrls: ['./designer.component.less']
 })
 export class DesignerComponent implements OnChanges {
-  @Input() jsonSchema: any;
+  @Input() inputSchema: any;
+  @Input() outputSchemaCallback: any;
 
   constructor(
     private schemaReaderService: SchemaReaderService) {}
 
   ngOnChanges() {
-    this.schemaReaderService.loadSchema(this.jsonSchema);
+    this.schemaReaderService.loadSchema(this.inputSchema);
+  }
+
+  exportSchema() {
+    this.outputSchemaCallback(this.schemaReaderService.workingSchema.jsonSchemaString());
   }
 }

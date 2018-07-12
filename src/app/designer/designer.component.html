@@ -1,3 +1,4 @@
+
 <div class="container">
   <div class="row">
     <div class="col-lg-6"> <!-- Left Pane -->
@@ -13,6 +14,9 @@
     </div>
     <div class="col-lg-6"> <!-- Right Pane -->
       <div class="card card-body bg-light">
+        <div class="text-center">
+          <button class="btn btn-secondary btn-sm" (click)="exportSchema()"><fa-icon></fa-icon> Export </button>
+        </div>
         <pre *ngIf="schemaReaderService.workingSchema"> {{schemaReaderService.workingSchema.jsonSchemaString()}}</pre>
       </div>
     </div>

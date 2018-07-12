@@ -39,4 +39,8 @@ export class AppComponent {
     };
     this.loadTestSchema();
   }
+
+  jsonChangeCallback(json: any): void {
+    console.log(json);
+  }
 }
