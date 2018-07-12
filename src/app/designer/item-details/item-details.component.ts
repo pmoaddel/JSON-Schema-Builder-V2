@@ -6,7 +6,7 @@ import { ISchemaItem } from '../schema';
   templateUrl: './item-details.component.html',
   styleUrls: ['./item-details.component.less']
 })
-export class ItemDetailsComponent implements OnChanges{
+export class ItemDetailsComponent implements OnChanges {
   @Input() item: ISchemaItem;
   enumCtrlExpanded: boolean;
 

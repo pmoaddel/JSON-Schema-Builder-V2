@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { SchemaReaderService } from '../schema-reader.service';
+import { Component, Input, OnChanges } from '@angular/core';
+import { SchemaReaderService } from './schema-reader.service';
 
 
 @Component({
@@ -7,8 +7,13 @@ import { SchemaReaderService } from '../schema-reader.service';
   templateUrl: './designer.component.html',
   styleUrls: ['./designer.component.less']
 })
-export class DesignerComponent {
+export class DesignerComponent implements OnChanges {
+  @Input() jsonSchema: any;
 
   constructor(
     private schemaReaderService: SchemaReaderService) {}
+
+  ngOnChanges() {
+    this.schemaReaderService.loadSchema(this.jsonSchema);
+  }
 }

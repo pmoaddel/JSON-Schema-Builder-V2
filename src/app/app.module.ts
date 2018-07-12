@@ -6,9 +6,9 @@ import { RouterModule, Routes } from '@angular/router';
 
 //Components
 import { AppComponent } from './app.component';
-import { RawComponent } from './raw/raw.component';
 import { DesignerComponent } from './designer/designer.component';
-import { SchemaRowComponent } from './schema-row/schema-row.component';
+import { SchemaRowComponent } from './designer/schema-row/schema-row.component';
+import { ItemDetailsComponent } from './designer/item-details/item-details.component';
 
 //Other Modules
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -17,19 +17,17 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faCoffee, faChevronRight, faChevronDown, faAsterisk, faPlus, faPencilAlt, faTimes, faCommentAlt, faCheck} from '@fortawesome/free-solid-svg-icons';
-import { ItemDetailsComponent } from './item-details/item-details.component'; //fas
+
 // import { far } from '@fortawesome/free-regular-svg-icons'; //don't need this one currently
 library.add(faCoffee, faChevronRight, faChevronDown, faAsterisk, faPlus, faPencilAlt, faTimes, faCommentAlt, faCheck);
 
 const appRoutes: Routes = [
-  { path: 'designer', component: DesignerComponent },
-  { path: 'raw',      component: RawComponent }
+  { path: 'designer', component: DesignerComponent }
 ];
 
 @NgModule({
   declarations: [
     AppComponent,
-    RawComponent,
     DesignerComponent,
     SchemaRowComponent,
     ItemDetailsComponent

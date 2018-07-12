@@ -17,7 +17,7 @@
     <div class="p-3">
       <ul class="nav nav-pills justify-content-center">
         <li class="nav-item">
-          <a class="nav-link" (click)="activeTab='designer'" [ngClass]="{'active': activeTab==='designer'}" routerLink='/designer'>Designer</a>
+          <a class="nav-link active">Designer</a>
         </li>
         <li class="nav-item">
           <label class="btn">
@@ -27,6 +27,6 @@
         </li>
       </ul>
     </div>
-    <router-outlet></router-outlet>
+    <app-designer [jsonSchema]="jsonSchema" ></app-designer>
   </div>
 </div>

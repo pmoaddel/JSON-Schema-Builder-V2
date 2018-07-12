@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { SchemaReaderService } from './schema-reader.service';
 declare var $: any;
 
 @Component({
@@ -10,9 +9,9 @@ declare var $: any;
 export class AppComponent {
   title: string = 'JSON Schema Builder V2';
   activeTab: string;
+  jsonSchema: any = {};
 
-  constructor(
-    private schemaReaderService: SchemaReaderService) { }
+  constructor() { }
 
   onFilesAdded(): void {
     const files: FileList = (<HTMLInputElement> document.getElementById('file')).files;
@@ -22,14 +21,14 @@ export class AppComponent {
     const fr: FileReader = new FileReader();
     fr.onload = (e: any) => {
       const result: any = JSON.parse(e.target.result);
-      this.schemaReaderService.loadSchema(result);
+      this.jsonSchema = result;
     }
     fr.readAsText(files.item(0));
   }
 
   loadTestSchema(): void {
     $.getJSON( '../assets/testData1.js', (data) => {
-      this.schemaReaderService.loadSchema(data);
+      this.jsonSchema = data;
     });
   }
 
@@ -38,8 +37,6 @@ export class AppComponent {
       title: 'New Schema',
       type: 'object'
     };
-    this.schemaReaderService.loadSchema(blankSchema);
-    this.activeTab = window.location.pathname.replace('/', '');
     this.loadTestSchema();
   }
 }
